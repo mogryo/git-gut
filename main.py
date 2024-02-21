@@ -1,21 +1,24 @@
-import click
+"""Main file of application"""
 from typing import AnyStr
+import click
 from git import Repo, Git
 from utils import draw_flat_tree_table, parse_option_columns
 from app_types import CliTableColumn
+from config import DEFAULT_COLUMNS
 
 
 @click.command()
 @click.argument('repo_path')
 @click.option(
     "--columns",
-    default=f"{CliTableColumn.ID.value}, {CliTableColumn.FILE_NAME.value}, {CliTableColumn.COMMIT_AMOUNT.value}",
+    default=DEFAULT_COLUMNS,
     help=f"""
-        Available column names: ${list(filter(lambda x: not x.startswith('_'), dir(CliTableColumn)))}
+        Column names: ${list(filter(lambda x: not x.startswith('_'), dir(CliTableColumn)))}
         Example of input: --columns={CliTableColumn.ID.value}, {CliTableColumn.FILE_NAME.value}
     """
 )
 def git_hot(repo_path: AnyStr, columns: AnyStr):
+    """Command entry point"""
     repo = Repo(repo_path)
     git_instance = Git(repo_path)
 
@@ -23,4 +26,5 @@ def git_hot(repo_path: AnyStr, columns: AnyStr):
 
 
 if __name__ == '__main__':
+    # pylint: disable = no-value-for-parameter
     git_hot()
