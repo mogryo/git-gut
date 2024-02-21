@@ -1,9 +1,15 @@
+"""Git utils"""
 from typing import List
 from git import Tree, Git
 from app_types.utils import FileCommitStats
 
 
 def get_flat_file_tree(tree: Tree) -> List[str]:
+    """
+    Iterate through the whole git file tree.
+    :param tree: Instance of git.Tree
+    :return: Flat representation of file tree.
+    """
     generated_list = []
     for entry in tree:
         if entry.type == "blob":
@@ -15,6 +21,12 @@ def get_flat_file_tree(tree: Tree) -> List[str]:
 
 
 def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
+    """
+    Collect number stats about file form git.
+    :param git_instance: Instance of git.Git
+    :param filepath: File path.
+    :return: Return list of stats.
+    """
     raw_result: str = git_instance.log('--follow', '--numstat', '--pretty=tformat:', '--', filepath)
     commit_list = raw_result.splitlines()
 

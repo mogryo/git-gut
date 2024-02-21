@@ -1,3 +1,4 @@
+"""Helper functions."""
 from utils.filesystem import *
 from utils.cli_table import *
 from utils.id_generator import *
