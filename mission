@@ -1,0 +1,6 @@
+- Show table with all files
+Table should contain columns
+! * unique short id
+! * file name (name + 2 path)
+! * filter out some directories, blacklist
+! * Dynamically show columns
