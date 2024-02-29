@@ -1,2 +1,4 @@
-./python3.12/**
-./.pytest_cache/**
+/python3.12/
+/.pytest_cache/
+/.idea/
+__pycache__/

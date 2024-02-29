@@ -2,7 +2,7 @@
 from typing import Unpack, Any, List, Self
 from git import Git, Repo
 from app_types.utils import ColumnBuilderKwargs, CliTableColumn
-from utils.git_utils import get_flat_file_tree, get_file_stats
+from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequent_author
 from utils.filesystem import trim_directories
 from utils.id_generator import generate_unique_keys
 
@@ -24,6 +24,7 @@ class ColumnBuilder:
             CliTableColumn.ID.value: self.add_id,
             CliTableColumn.FILE_NAME.value: self.add_file_name,
             CliTableColumn.COMMIT_AMOUNT.value: self.add_commit_amount,
+            CliTableColumn.MOST_FREQUENT_AUTHOR.value: self.add_author,
         }
 
     def add_id(self) -> Self:
@@ -48,6 +49,15 @@ class ColumnBuilder:
         """Add commit amount column"""
         self._columns.append(
             [len(get_file_stats(self.git_instance, name)) for name in self.flat_file_tree]
+        )
+        return self
+
+    def add_author(self) -> Self:
+        """Add author column"""
+        self._columns.append(
+            list(
+                map(lambda x: get_most_frequent_author(self.git_instance, x), self.flat_file_tree)
+            )
         )
         return self
 

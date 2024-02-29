@@ -10,6 +10,7 @@ class CliTableColumn(Enum):
     ID = "id"
     FILE_NAME = "filename"
     COMMIT_AMOUNT = "commitcount"
+    MOST_FREQUENT_AUTHOR = "mfauthor"
 
 
 class CliTableColumnLabel(Enum):
@@ -17,7 +18,7 @@ class CliTableColumnLabel(Enum):
     ID = "ID"
     FILENAME = "Filename"
     COMMITCOUNT = "Commit amount"
-
+    MFAUTHOR = "Most frequent author"
 
 class GenerateUniqueKeysKwargs(TypedDict):
     """Kwargs for generating unique keys"""
@@ -39,6 +40,7 @@ class FileCommitStats:
     """Dataclass for file commit stats information"""
     added_lines: str
     removed_lines: str
+    author: str
 
 
 class ColumnBuilderKwargs(TypedDict):
