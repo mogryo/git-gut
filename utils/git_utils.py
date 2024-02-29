@@ -1,7 +1,9 @@
 """Git utils"""
 from typing import List
+from statistics import mode
 from git import Tree, Git
 from app_types.utils import FileCommitStats
+from utils.text import trim_side_quotes
 
 
 def get_flat_file_tree(tree: Tree) -> List[str]:
@@ -27,12 +29,24 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     :param filepath: File path.
     :return: Return list of stats.
     """
-    raw_result: str = git_instance.log('--follow', '--numstat', '--pretty=tformat:', '--', filepath)
-    commit_list = raw_result.splitlines()
+    raw_result: str = git_instance.log("--follow", "--numstat", "--format=\"%an\"", '--', filepath)
+    separate_lines = list(filter(lambda x: x != "", raw_result.splitlines()))
+    commit_list = list(zip(separate_lines[::2], separate_lines[1::2]))
 
     result = []
-    for commit_stat in commit_list:
-        split_stat = commit_stat.split()
-        result.append(FileCommitStats(split_stat[0], split_stat[1]))
+    for commit_info in commit_list:
+        split_stat = commit_info[1].split()
+        result.append(FileCommitStats(split_stat[0], split_stat[1], commit_info[0]))
 
     return result
+
+
+def get_most_frequent_author(git_instance: Git, file_name: str) -> str:
+    """
+    Calculate the author of the most code in file
+    :param git_instance: Instance of git.Git
+    :param file_name: Name of file
+    :return: Author name
+    """
+    authors = [info.author for info in get_file_stats(git_instance, file_name)]
+    return trim_side_quotes(mode(authors))
