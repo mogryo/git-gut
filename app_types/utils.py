@@ -11,6 +11,8 @@ class CliTableColumn(Enum):
     FILE_NAME = "filename"
     COMMIT_AMOUNT = "commitcount"
     MOST_FREQUENT_AUTHOR = "mfauthor"
+    MOST_ADDED_AUTHOR = "maauthor"
+    MOST_DELETED_AUTHOR = "mdauthor"
 
 
 class CliTableColumnLabel(Enum):
@@ -19,6 +21,9 @@ class CliTableColumnLabel(Enum):
     FILENAME = "Filename"
     COMMITCOUNT = "Commit amount"
     MFAUTHOR = "Most frequent author"
+    MAAUTHOR = "Most + lines by (amount)"
+    MDAUTHOR = "Most - lines by (amount)"
+
 
 class GenerateUniqueKeysKwargs(TypedDict):
     """Kwargs for generating unique keys"""
