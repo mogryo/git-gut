@@ -1,5 +1,6 @@
 """Git utils"""
 from typing import List, Callable
+from functools import cache
 from statistics import mode
 from git import Tree, Git
 from app_types.utils import FileCommitStats
@@ -22,6 +23,7 @@ def get_flat_file_tree(tree: Tree) -> List[str]:
     return generated_list
 
 
+@cache
 def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     """
     Collect number stats about file form git.
