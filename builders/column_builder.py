@@ -2,7 +2,8 @@
 from typing import Unpack, Any, List, Self
 from git import Git, Repo
 from app_types.utils import ColumnBuilderKwargs, CliTableColumn
-from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequent_author
+from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequent_author,\
+    get_top_author_by_stat
 from utils.filesystem import trim_directories
 from utils.id_generator import generate_unique_keys
 
@@ -25,6 +26,8 @@ class ColumnBuilder:
             CliTableColumn.FILE_NAME.value: self.add_file_name,
             CliTableColumn.COMMIT_AMOUNT.value: self.add_commit_amount,
             CliTableColumn.MOST_FREQUENT_AUTHOR.value: self.add_author,
+            CliTableColumn.MOST_ADDED_AUTHOR.value: self.add_most_added_lines_author,
+            CliTableColumn.MOST_DELETED_AUTHOR.value: self.add_most_deleted_lines_author,
         }
 
     def add_id(self) -> Self:
@@ -57,6 +60,34 @@ class ColumnBuilder:
         self._columns.append(
             list(
                 map(lambda x: get_most_frequent_author(self.git_instance, x), self.flat_file_tree)
+            )
+        )
+        return self
+
+    def add_most_added_lines_author(self) -> Self:
+        """Add author of most added lines of code column"""
+        self._columns.append(
+            list(
+                map(
+                    lambda file_name: get_top_author_by_stat(
+                        self.git_instance, file_name, lambda x: int(x.added_lines),
+                    ),
+                    self.flat_file_tree
+                )
+            )
+        )
+        return self
+
+    def add_most_deleted_lines_author(self) -> Self:
+        """Add author of most deleted lines of code column"""
+        self._columns.append(
+            list(
+                map(
+                    lambda file_name: get_top_author_by_stat(
+                        self.git_instance, file_name, lambda x: int(x.removed_lines),
+                    ),
+                    self.flat_file_tree
+                )
             )
         )
         return self

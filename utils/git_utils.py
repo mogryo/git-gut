@@ -1,5 +1,5 @@
 """Git utils"""
-from typing import List
+from typing import List, Callable
 from statistics import mode
 from git import Tree, Git
 from app_types.utils import FileCommitStats
@@ -50,3 +50,24 @@ def get_most_frequent_author(git_instance: Git, file_name: str) -> str:
     """
     authors = [info.author for info in get_file_stats(git_instance, file_name)]
     return trim_side_quotes(mode(authors))
+
+
+def get_top_author_by_stat(
+        git_instance: Git, file_name: str, func: Callable[[FileCommitStats], int]
+) -> str:
+    """
+    Functions calculates top author,
+    by summing up specific stat which is returned by provided function
+    :param git_instance: Instance of git.Git
+    :param file_name: Name of file
+    :param func: Function to be applied on file commit stats to extract specific property
+    :return: Top author and summed up stat
+    """
+    authors_data = {}
+    for stat in get_file_stats(git_instance, file_name):
+        authors_data[stat.author] = authors_data.get(stat.author, 0) + func(stat)
+
+    top_author = max(authors_data, key=authors_data.get)
+    author_total_sum = authors_data[top_author]
+
+    return f'{trim_side_quotes(top_author)} ({author_total_sum})'
