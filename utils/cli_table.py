@@ -2,8 +2,8 @@
 from typing import Unpack
 from git import Repo, Git
 from prettytable import PrettyTable
-from app_types import DrawFlatTreeTableKwargs, CliTableColumnLabel
-from builders import ColumnBuilder
+from app_types.utils import DrawFlatTreeTableKwargs, CliTableColumnLabel
+from builders.column_builder import ColumnBuilder
 
 
 def draw_flat_tree_table(

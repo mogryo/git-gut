@@ -38,7 +38,7 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     result = []
     for commit_info in commit_list:
         split_stat = commit_info[1].split()
-        result.append(FileCommitStats(split_stat[0], split_stat[1], commit_info[0]))
+        result.append(FileCommitStats(int(split_stat[0]), int(split_stat[1]), commit_info[0]))
 
     return result
 

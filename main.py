@@ -2,9 +2,10 @@
 from typing import AnyStr
 import click
 from git import Repo, Git
-from utils import draw_flat_tree_table, parse_option_columns
-from app_types import CliTableColumn
-from config import DEFAULT_COLUMNS
+from utils.cli_table import draw_flat_tree_table
+from utils.command_option_parser import parse_option_columns
+from app_types.utils import CliTableColumn
+from config.command_defaults import DEFAULT_COLUMNS
 
 
 @click.command()
