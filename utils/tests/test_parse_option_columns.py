@@ -1,6 +1,6 @@
 """Test parse_option_columns"""
-from utils import parse_option_columns
-from app_types import CliTableColumn
+from utils.command_option_parser import parse_option_columns
+from app_types.utils import CliTableColumn
 
 
 def test_empty_string() -> None:

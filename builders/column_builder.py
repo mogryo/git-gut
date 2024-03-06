@@ -6,6 +6,7 @@ from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequen
     get_top_author_by_stat
 from utils.filesystem import trim_directories
 from utils.id_generator import generate_unique_keys
+from features.technical_debt import calculate_deleted_added_ratio, calculate_line_count
 
 
 class ColumnBuilder:
@@ -28,6 +29,8 @@ class ColumnBuilder:
             CliTableColumn.MOST_FREQUENT_AUTHOR.value: self.add_author,
             CliTableColumn.MOST_ADDED_AUTHOR.value: self.add_most_added_lines_author,
             CliTableColumn.MOST_DELETED_AUTHOR.value: self.add_most_deleted_lines_author,
+            CliTableColumn.DELETED_ADDED_RATIO.value: self.add_deleted_added_ratio,
+            CliTableColumn.LINE_COUNT.value: self.add_line_count,
         }
 
     def add_id(self) -> Self:
@@ -39,6 +42,7 @@ class ColumnBuilder:
                 key_length=len(str(len(self.flat_file_tree)))
             )
         )
+
         return self
 
     def add_file_name(self) -> Self:
@@ -46,6 +50,7 @@ class ColumnBuilder:
         self._columns.append(
             [trim_directories(name, self.pathname_length) for name in self.flat_file_tree]
         )
+
         return self
 
     def add_commit_amount(self) -> Self:
@@ -53,6 +58,7 @@ class ColumnBuilder:
         self._columns.append(
             [len(get_file_stats(self.git_instance, name)) for name in self.flat_file_tree]
         )
+
         return self
 
     def add_author(self) -> Self:
@@ -62,6 +68,7 @@ class ColumnBuilder:
                 map(lambda x: get_most_frequent_author(self.git_instance, x), self.flat_file_tree)
             )
         )
+
         return self
 
     def add_most_added_lines_author(self) -> Self:
@@ -76,6 +83,7 @@ class ColumnBuilder:
                 )
             )
         )
+
         return self
 
     def add_most_deleted_lines_author(self) -> Self:
@@ -90,6 +98,37 @@ class ColumnBuilder:
                 )
             )
         )
+
+        return self
+
+    def add_deleted_added_ratio(self) -> Self:
+        """Add deleted/added ratio column"""
+        def shorten_ratio(number: float) -> str:
+            """Local function to shorten the float precision"""
+            return f"{number:.4f}"
+
+        self._columns.append(
+            list(map(
+                lambda file_name: shorten_ratio(calculate_deleted_added_ratio(
+                    get_file_stats(self.git_instance, file_name)
+                )),
+                self.flat_file_tree
+            ))
+        )
+
+        return self
+
+    def add_line_count(self) -> Self:
+        """Add line amount in file (from git history) column"""
+        self._columns.append(
+            list(map(
+                lambda file_name: calculate_line_count(
+                    get_file_stats(self.git_instance, file_name)
+                ),
+                self.flat_file_tree
+            ))
+        )
+
         return self
 
     def as_rows(self) -> List[List[Any]]:

@@ -1,5 +1,5 @@
 """Defaults for command options"""
-from app_types import CliTableColumn
+from app_types.utils import CliTableColumn
 
 
 DEFAULT_COLUMNS = ", ".join([

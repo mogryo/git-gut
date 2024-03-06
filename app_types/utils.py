@@ -13,6 +13,8 @@ class CliTableColumn(Enum):
     MOST_FREQUENT_AUTHOR = "mfauthor"
     MOST_ADDED_AUTHOR = "maauthor"
     MOST_DELETED_AUTHOR = "mdauthor"
+    DELETED_ADDED_RATIO = "daratio"
+    LINE_COUNT = "linecount"
 
 
 class CliTableColumnLabel(Enum):
@@ -23,6 +25,8 @@ class CliTableColumnLabel(Enum):
     MFAUTHOR = "Most frequent author"
     MAAUTHOR = "Most + lines by (amount)"
     MDAUTHOR = "Most - lines by (amount)"
+    DARATIO = "Delete/Add ratio"
+    LINECOUNT = "Line count"
 
 
 class GenerateUniqueKeysKwargs(TypedDict):
@@ -43,8 +47,8 @@ class DrawFlatTreeTableKwargs(TypedDict):
 @dataclass
 class FileCommitStats:
     """Dataclass for file commit stats information"""
-    added_lines: str
-    removed_lines: str
+    added_lines: int
+    removed_lines: int
     author: str
 
 
