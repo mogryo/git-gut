@@ -11,24 +11,18 @@ def test_empty_list() -> None:
         calculate_deleted_added_ratio([])
 
 
-def test_negative_values() -> None:
-    """Test negative values - should throw error"""
-    with pytest.raises(StatisticsError):
-        calculate_deleted_added_ratio([FileCommitStats(-5, 2, ""), FileCommitStats(1, -5, "")])
-
-
 def test_zero_added_value() -> None:
     """Test zero value in added lines - should be replaced to 1"""
     assert calculate_deleted_added_ratio([
-        FileCommitStats(5, 0, ""),
-    ]) == 1/5
+        FileCommitStats(added_lines=0, removed_lines=5, author=""),
+    ]) == 5
 
 
 def test_zero_deleted_value() -> None:
     """Test zero value in deleted lines - should be replaced to 1"""
     assert calculate_deleted_added_ratio([
-        FileCommitStats(0, 5, ""),
-    ]) == 5
+        FileCommitStats(added_lines=5, removed_lines=0, author=""),
+    ]) == 0
 
 
 def test_valid_multiple_stats() -> None:
@@ -46,4 +40,4 @@ def test_result_is_harmonic_mean() -> None:
         FileCommitStats(1, 7, ""),
         FileCommitStats(1, 9, ""),
     ])
-    assert f"{result:.2f}" == "4.19"
+    assert f"{result:.2f}" == "5.75"

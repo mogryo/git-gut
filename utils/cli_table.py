@@ -2,8 +2,10 @@
 from typing import Unpack
 from git import Repo, Git
 from prettytable import PrettyTable
-from app_types.utils import DrawFlatTreeTableKwargs, CliTableColumnLabel
+from app_types.utils import DrawFlatTreeTableKwargs
+from enums.columns import CliTableColumnLabel, CliTableColumn
 from builders.column_builder import ColumnBuilder
+from defaults.color_pipelines import line_count_pipe, delete_add_ratio_pipe
 
 
 def draw_flat_tree_table(
@@ -20,8 +22,10 @@ def draw_flat_tree_table(
     """
     column_technical_names = kwargs.get("columns")
 
-    rows = ColumnBuilder(git_instance, repo, pathname_length=kwargs.get("pathname_length", 2))\
-        .build_from_column_names(column_technical_names)\
+    rows = ColumnBuilder(git_instance, repo, pathname_length=kwargs.get("pathname_length", 2)) \
+        .build_from_column_names(column_technical_names) \
+        .set_color_pipe(CliTableColumn.LINE_COUNT, line_count_pipe) \
+        .set_color_pipe(CliTableColumn.DELETED_ADDED_RATIO, delete_add_ratio_pipe) \
         .as_rows()
 
     table = kwargs.get(
