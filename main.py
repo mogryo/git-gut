@@ -5,7 +5,7 @@ from git import Repo, Git
 from utils.cli_table import draw_flat_tree_table
 from utils.command_option_parser import parse_option_columns
 from app_types.utils import CliTableColumn
-from config.command_defaults import DEFAULT_COLUMNS
+from defaults.command import DEFAULT_COLUMNS
 
 
 @click.command()

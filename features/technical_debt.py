@@ -1,6 +1,6 @@
 """Functions to calculate different technical debt levels"""
 from typing import List
-from statistics import harmonic_mean
+from statistics import mean
 from app_types.utils import FileCommitStats
 
 
@@ -11,9 +11,9 @@ def calculate_deleted_added_ratio(commit_stats: List[FileCommitStats]) -> float:
         return number if number != 0 else 1
 
     added_deleted_ratios = [
-        parse_zero(info.removed_lines) / parse_zero(info.added_lines) for info in commit_stats
+        info.removed_lines / parse_zero(info.added_lines) for info in commit_stats
     ]
-    return harmonic_mean(added_deleted_ratios)
+    return mean(added_deleted_ratios)
 
 
 def calculate_line_count(commit_stats: List[FileCommitStats]) -> int:
