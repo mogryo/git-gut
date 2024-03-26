@@ -2,6 +2,7 @@
 from typing import Self, List, Callable
 from enums.columns import CliTableColumnColor
 
+
 class ColorPipelineBuilder:
     """Builder for column color"""
     def __init__(self):
@@ -28,12 +29,15 @@ class ColorPipelineBuilder:
 
     def as_pipe(self) -> Callable[[str], str]:
         """Return a piped function, to match value to color"""
+        pipe_functions = [*self._pipe]
+
         def call_pipe(value: str) -> str:
             """Returned function, to match color"""
-            for func in self._pipe:
+            for func in pipe_functions:
                 color = func(value)
                 if color is not None:
                     return f"{color.value}{value}{CliTableColumnColor.RESET.value}"
             return value
 
+        self._pipe = []
         return call_pipe

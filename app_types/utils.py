@@ -1,8 +1,6 @@
 """Types and enums for utils."""
-from typing import TypedDict, Optional, List
+from typing import TypedDict, Optional
 from dataclasses import dataclass
-from app_types.protocols import CliTable
-from enums.columns import CliTableColumn
 
 
 class GenerateUniqueKeysKwargs(TypedDict):
@@ -10,14 +8,6 @@ class GenerateUniqueKeysKwargs(TypedDict):
     start_key: int
     end_key: int
     key_length: Optional[int]
-
-
-class DrawFlatTreeTableKwargs(TypedDict):
-    """Kwargs for building flat tree table"""
-    path: str
-    pathname_length: Optional[int]
-    cli_table: Optional[CliTable]
-    columns: Optional[List[CliTableColumn]]
 
 
 @dataclass
