@@ -1,8 +1,9 @@
 """Builder pattern for columns"""
-from typing import Unpack, Any, List, Self, Callable
+from typing import Unpack, List, Self, Callable, Dict
 from collections import OrderedDict
 from git import Git, Repo
-from app_types.utils import ColumnBuilderKwargs, CliTableColumn
+from app_types.utils import ColumnBuilderKwargs
+from enums.columns import CliTableColumn
 from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequent_author,\
     get_top_author_by_stat
 from utils.filesystem import trim_directories
@@ -10,7 +11,7 @@ from utils.id_generator import generate_unique_keys
 from features.technical_debt import calculate_deleted_added_ratio, calculate_line_count
 
 
-class ColumnBuilder:
+class ColumnDataBuilder:
     """Builder for columns"""
     def __init__(
             self,
@@ -23,7 +24,8 @@ class ColumnBuilder:
         self.flat_file_tree = get_flat_file_tree(self.repo_instance.head.commit.tree)
         self.pathname_length = kwargs.get("pathname_length", 2)
         self._columns: OrderedDict[str, List[str]] = OrderedDict()
-        self._methods = {
+        # Todo: Automate this dictionary generation (decorators/reflection)
+        self._methods: Dict[CliTableColumn.value, Callable[[], Self]] = {
             CliTableColumn.ID.value: self.add_id,
             CliTableColumn.FILE_NAME.value: self.add_file_name,
             CliTableColumn.COMMIT_AMOUNT.value: self.add_commit_amount,
@@ -122,21 +124,12 @@ class ColumnBuilder:
 
         return self
 
-    def as_rows(self) -> List[List[Any]]:
-        """Transform data into rows"""
-        return list(zip(*self._columns.values()))
+    @property
+    def building_methods(self) -> Dict[str, Callable[[], Self]]:
+        """Get all methods for building column data"""
+        return self._methods
 
-    def build_from_column_names(self, column_names: List[CliTableColumn]) -> Self:
-        """Build columns/rows form column names"""
-        for name in column_names:
-            self._methods[name]()
-
-        return self
-
-    def set_color_pipe(self, column_name: CliTableColumn, pipe: Callable[[str], str]):
-        """Apply color pipe for specific column"""
-        self._columns[column_name.value] = [
-            pipe(value) for value in self._columns[column_name.value]
-        ]
-
-        return self
+    @property
+    def columns(self) -> OrderedDict[str, List[str]]:
+        """Return columns, and reset builder"""
+        return self._columns

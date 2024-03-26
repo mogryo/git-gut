@@ -33,3 +33,9 @@ class CliTableColumnColor(Enum):
     YELLOW = "\033[0;33;40m"
     BLUE = "\033[0;34;40m"
     RESET = "\033[0m"
+
+
+class SortingDirection(Enum):
+    """Enum for sorting direction"""
+    ASC = 'ascending'
+    DESC = 'descending'

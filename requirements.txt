@@ -7,3 +7,5 @@ pytest==8.0.0
 pytest-cov==4.1.0
 pytest-mock==3.12.0
 pylint==3.0.3
+SQLAlchemy==2.0.28
+typing-extensions==4.10.0
