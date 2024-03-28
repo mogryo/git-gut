@@ -3,7 +3,7 @@ from typing import List, Callable
 from functools import cache
 from statistics import mode
 from git import Tree, Git
-from app_types.utils import FileCommitStats
+from app_types.dataclasses import FileCommitStats
 from utils.text import trim_side_quotes
 
 

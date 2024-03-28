@@ -1,7 +1,7 @@
 """Test calculate_deleted_added_ratio"""
 from statistics import StatisticsError
 import pytest
-from app_types.utils import FileCommitStats
+from app_types.dataclasses import FileCommitStats
 from features.technical_debt import calculate_deleted_added_ratio
 
 

@@ -1,6 +1,6 @@
 """Test calculate_line_count"""
 from features.technical_debt import calculate_line_count
-from app_types.utils import FileCommitStats
+from app_types.dataclasses import FileCommitStats
 
 
 def test_empty_list() -> None:

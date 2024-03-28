@@ -37,5 +37,5 @@ class CliTableColumnColor(Enum):
 
 class SortingDirection(Enum):
     """Enum for sorting direction"""
-    ASC = 'ascending'
-    DESC = 'descending'
+    ASC = 'asc'
+    DESC = 'desc'

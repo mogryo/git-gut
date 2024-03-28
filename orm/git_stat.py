@@ -4,6 +4,7 @@ from sqlalchemy.types import Integer, String, Float
 from orm.base import Base
 
 
+# pylint: disable = too-few-public-methods
 class GitStat(Base):
     """Table containing all columns information for printing to user"""
     __tablename__ = "GitStat"

@@ -1,7 +1,7 @@
 """Functions to calculate different technical debt levels"""
 from typing import List
 from statistics import mean
-from app_types.utils import FileCommitStats
+from app_types.dataclasses import FileCommitStats
 
 
 def calculate_deleted_added_ratio(commit_stats: List[FileCommitStats]) -> float:
