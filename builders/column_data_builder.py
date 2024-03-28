@@ -24,7 +24,7 @@ class ColumnDataBuilder:
         self.flat_file_tree = get_flat_file_tree(self.repo_instance.head.commit.tree)
         self.pathname_length = kwargs.get("pathname_length", 2)
         self._columns: OrderedDict[str, List[str]] = OrderedDict()
-        # Todo: Automate this dictionary generation (decorators/reflection)
+
         self._methods: Dict[CliTableColumn.value, Callable[[], Self]] = {
             CliTableColumn.ID.value: self.add_id,
             CliTableColumn.FILE_NAME.value: self.add_file_name,

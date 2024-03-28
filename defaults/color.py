@@ -1,5 +1,5 @@
 """Defaults for column colors"""
-from app_types.builders import NumberColumnColorCondition
+from app_types.dataclasses import NumberColumnColorCondition
 from enums.columns import CliTableColumnColor
 
 line_count_color = [

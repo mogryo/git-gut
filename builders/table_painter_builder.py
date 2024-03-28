@@ -1,6 +1,6 @@
 """Rows painter builder"""
 from typing import List, Self, Any
-from app_types.builders import NumberColumnColorCondition
+from app_types.dataclasses import NumberColumnColorCondition
 from builders.color_pipeline_builder import ColorPipelineBuilder
 from enums.columns import CliTableColumn
 
