@@ -24,14 +24,7 @@ def prepare_all_rows(column_names: List[CliTableColumn], rows: List[List[Any]]) 
 
 
 COLUMN_TO_GIT_STAT_MAPPING = {
-    CliTableColumn.ID.value: GitStat.id,
-    CliTableColumn.FILE_NAME.value: GitStat.filename,
-    CliTableColumn.LINE_COUNT.value: GitStat.linecount,
-    CliTableColumn.COMMIT_AMOUNT.value: GitStat.commitcount,
-    CliTableColumn.DELETED_ADDED_RATIO.value: GitStat.daratio,
-    CliTableColumn.MOST_ADDED_AUTHOR.value: GitStat.maauthor,
-    CliTableColumn.MOST_DELETED_AUTHOR.value: GitStat.mdauthor,
-    CliTableColumn.MOST_FREQUENT_AUTHOR.value: GitStat.mfauthor,
+    column.value: getattr(GitStat, column.value) for column in CliTableColumn
 }
 
 
