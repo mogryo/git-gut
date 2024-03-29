@@ -3,6 +3,7 @@ from typing import Unpack, List, Self, Callable, Dict
 from collections import OrderedDict
 from git import Git, Repo
 from app_types.utils import ColumnBuilderKwargs
+from decorators.column_building_method import column_building_method
 from enums.columns import CliTableColumn
 from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequent_author,\
     get_top_author_by_stat
@@ -25,17 +26,7 @@ class ColumnDataBuilder:
         self.pathname_length = kwargs.get("pathname_length", 2)
         self._columns: OrderedDict[str, List[str]] = OrderedDict()
 
-        self._methods: Dict[CliTableColumn.value, Callable[[], Self]] = {
-            CliTableColumn.ID.value: self.add_id,
-            CliTableColumn.FILE_NAME.value: self.add_file_name,
-            CliTableColumn.COMMIT_AMOUNT.value: self.add_commit_amount,
-            CliTableColumn.MOST_FREQUENT_AUTHOR.value: self.add_author,
-            CliTableColumn.MOST_ADDED_AUTHOR.value: self.add_most_added_lines_author,
-            CliTableColumn.MOST_DELETED_AUTHOR.value: self.add_most_deleted_lines_author,
-            CliTableColumn.DELETED_ADDED_RATIO.value: self.add_delete_add_ratio,
-            CliTableColumn.LINE_COUNT.value: self.add_line_count,
-        }
-
+    @column_building_method(CliTableColumn.ID)
     def add_id(self) -> Self:
         """Add ID column"""
         self._columns[CliTableColumn.ID.value] = generate_unique_keys(
@@ -46,6 +37,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.FILE_NAME)
     def add_file_name(self) -> Self:
         """Add file name column"""
         self._columns[CliTableColumn.FILE_NAME.value] = [
@@ -54,6 +46,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.COMMIT_AMOUNT)
     def add_commit_amount(self) -> Self:
         """Add commit amount column"""
         self._columns[CliTableColumn.COMMIT_AMOUNT.value] = [
@@ -62,6 +55,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.MOST_FREQUENT_AUTHOR)
     def add_author(self) -> Self:
         """Add author column"""
         self._columns[CliTableColumn.MOST_FREQUENT_AUTHOR.value] = list(
@@ -70,6 +64,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.MOST_ADDED_AUTHOR)
     def add_most_added_lines_author(self) -> Self:
         """Add author of most added lines of code column"""
         self._columns[CliTableColumn.MOST_ADDED_AUTHOR.value] = (
@@ -85,6 +80,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.MOST_DELETED_AUTHOR)
     def add_most_deleted_lines_author(self) -> Self:
         """Add author of most deleted lines of code column"""
         self._columns[CliTableColumn.MOST_DELETED_AUTHOR.value] = list(
@@ -98,6 +94,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.DELETED_ADDED_RATIO)
     def add_delete_add_ratio(self) -> Self:
         """Add deleted/added ratio column"""
         def shorten_ratio(number: float) -> str:
@@ -113,6 +110,7 @@ class ColumnDataBuilder:
 
         return self
 
+    @column_building_method(CliTableColumn.LINE_COUNT)
     def add_line_count(self) -> Self:
         """Add line amount in file (from git history) column"""
         self._columns[CliTableColumn.LINE_COUNT.value] = list(map(
@@ -127,7 +125,19 @@ class ColumnDataBuilder:
     @property
     def building_methods(self) -> Dict[str, Callable[[], Self]]:
         """Get all methods for building column data"""
-        return self._methods
+        def is_builder_method(method_name: str):
+            """Determine if method is column builder method"""
+            return not method_name.startswith('_') and method_name != 'building_methods'\
+                and method_name != 'git_instance'\
+                and hasattr(getattr(self, method_name), "builder_column_name")\
+                and getattr(self, method_name).builder_column_name
+
+        builder_methods = list(filter(is_builder_method, dir(self)))
+
+        return {
+            getattr(self, func_name)
+            .builder_column_name.value: getattr(self, func_name) for func_name in builder_methods
+        }
 
     @property
     def columns(self) -> OrderedDict[str, List[str]]:

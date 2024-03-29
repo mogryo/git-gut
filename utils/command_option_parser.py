@@ -5,19 +5,11 @@ from app_types.dataclasses import SortingRule
 from enums.columns import CliTableColumn, SortingDirection
 
 REVERSE_COLUMN_NAME_MAPPING = {
-    CliTableColumn.ID.value: CliTableColumn.ID,
-    CliTableColumn.FILE_NAME.value: CliTableColumn.FILE_NAME,
-    CliTableColumn.COMMIT_AMOUNT.value: CliTableColumn.COMMIT_AMOUNT,
-    CliTableColumn.MOST_FREQUENT_AUTHOR.value: CliTableColumn.MOST_FREQUENT_AUTHOR,
-    CliTableColumn.MOST_ADDED_AUTHOR.value: CliTableColumn.MOST_ADDED_AUTHOR,
-    CliTableColumn.MOST_DELETED_AUTHOR.value: CliTableColumn.MOST_DELETED_AUTHOR,
-    CliTableColumn.DELETED_ADDED_RATIO.value: CliTableColumn.DELETED_ADDED_RATIO,
-    CliTableColumn.LINE_COUNT.value: CliTableColumn.LINE_COUNT,
+    cli_table_column.value: cli_table_column for cli_table_column in CliTableColumn
 }
 
 REVERSE_SORTING_MAPPING = {
-    SortingDirection.ASC.value: SortingDirection.ASC,
-    SortingDirection.DESC.value: SortingDirection.DESC,
+    sorting_direction.value: sorting_direction for sorting_direction in SortingDirection
 }
 
 
