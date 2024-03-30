@@ -1,5 +1,4 @@
 """Defaults for command options"""
-from app_types.dataclasses import SortingRule
 from enums.columns import CliTableColumn, SortingDirection
 
 DEFAULT_COLUMNS = ",".join([
