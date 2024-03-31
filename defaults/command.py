@@ -2,8 +2,8 @@
 from enums.columns import CliTableColumn, SortingDirection
 
 DEFAULT_COLUMNS = ",".join([
-    CliTableColumn.ID.value,
     CliTableColumn.FILE_NAME.value,
+    CliTableColumn.LINE_COUNT.value,
     CliTableColumn.COMMIT_AMOUNT.value
 ])
 

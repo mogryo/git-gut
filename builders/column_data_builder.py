@@ -8,7 +8,6 @@ from enums.columns import CliTableColumn
 from utils.git_utils import get_flat_file_tree, get_file_stats, get_most_frequent_author,\
     get_top_author_by_stat
 from utils.filesystem import trim_directories
-from utils.id_generator import generate_unique_keys
 from features.technical_debt import calculate_deleted_added_ratio, calculate_line_count
 
 
@@ -25,17 +24,6 @@ class ColumnDataBuilder:
         self.flat_file_tree = get_flat_file_tree(self.repo_instance.head.commit.tree)
         self.pathname_length = kwargs.get("pathname_length", 2)
         self._columns: OrderedDict[str, List[str]] = OrderedDict()
-
-    @column_building_method(CliTableColumn.ID)
-    def add_id(self) -> Self:
-        """Add ID column"""
-        self._columns[CliTableColumn.ID.value] = generate_unique_keys(
-            start_key=0,
-            end_key=len(self.flat_file_tree),
-            key_length=len(str(len(self.flat_file_tree)))
-        )
-
-        return self
 
     @column_building_method(CliTableColumn.FILE_NAME)
     def add_file_name(self) -> Self:
