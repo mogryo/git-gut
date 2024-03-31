@@ -25,12 +25,12 @@ def test_single_column_name_with_whitespaces_commas() -> None:
 def test_multiple_column_names() -> None:
     """Check multiple names are parsed"""
     assert parse_option_columns(
-        f"{CliTableColumn.FILE_NAME.value},{CliTableColumn.ID.value}"
-    ) == [CliTableColumn.FILE_NAME, CliTableColumn.ID]
+        f"{CliTableColumn.FILE_NAME.value},{CliTableColumn.LINE_COUNT.value}"
+    ) == [CliTableColumn.FILE_NAME, CliTableColumn.LINE_COUNT]
 
 
 def test_multiple_column_names_with_whitespaces_commas() -> None:
     """Check whitespaces and commas are ignore, with multiple names"""
     assert parse_option_columns(
-        f"  ,{CliTableColumn.FILE_NAME.value}  ,  {CliTableColumn.ID.value}  , ,"
-    ) == [CliTableColumn.FILE_NAME, CliTableColumn.ID]
+        f"  ,{CliTableColumn.FILE_NAME.value}  ,  {CliTableColumn.LINE_COUNT.value}  , ,"
+    ) == [CliTableColumn.FILE_NAME, CliTableColumn.LINE_COUNT]

@@ -18,6 +18,11 @@ from enums.columns import CliTableColumn
 from repositories.git_stat_repo import prepare_all_rows, prepare_select,\
     prepare_order_by
 
+COMMAND_OPTION_COLUMN_NAMES = list(filter(lambda x: not x.startswith('_'), dir(CliTableColumn)))
+COLUMN_OPTION_EXAMPLE = f"{CliTableColumn.FILE_NAME.value},{CliTableColumn.LINE_COUNT.value}"
+SORT_OPTION_EXAMPLE = f"{CliTableColumn.FILE_NAME.value}-asc," \
+    f"{CliTableColumn.LINE_COUNT.value}-desc"
+
 
 @click.command()
 @click.argument('repo_path')
@@ -25,17 +30,17 @@ from repositories.git_stat_repo import prepare_all_rows, prepare_select,\
     "--columns",
     default=DEFAULT_COLUMNS,
     help=f"""
-        Column names: ${list(filter(lambda x: not x.startswith('_'), dir(CliTableColumn)))}
-        Example of input: --columns={CliTableColumn.ID.value},{CliTableColumn.FILE_NAME.value}
+        Column names: ${COMMAND_OPTION_COLUMN_NAMES}
+        Example of input: --columns={COLUMN_OPTION_EXAMPLE}
     """
 )
 @click.option(
     "--sort",
     default=DEFAULT_SORT,
     help=f"""
-        Column names: ${list(filter(lambda x: not x.startswith('_'), dir(CliTableColumn)))}
+        Column names: ${COMMAND_OPTION_COLUMN_NAMES}
         Sort variants: asc or desc
-        Example of input: --sort={CliTableColumn.ID.value}-asc,{CliTableColumn.FILE_NAME.value}-desc
+        Example of input: --sort={SORT_OPTION_EXAMPLE}
     """
 )
 def git_hot(repo_path: str, columns: Optional[str], sort: Optional[str]):
@@ -69,6 +74,7 @@ def git_hot(repo_path: str, columns: Optional[str], sort: Optional[str]):
         .rows
 
     draw_flat_tree_table(column_names, painted_rows, PrettyTable())
+    print(f"Total files: {len(painted_rows)}")
 
 
 if __name__ == '__main__':
