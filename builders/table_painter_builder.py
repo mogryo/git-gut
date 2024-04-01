@@ -1,5 +1,5 @@
 """Rows painter builder"""
-from typing import List, Self, Any
+from typing import List, Self, Any, Dict
 from app_types.dataclasses import NumberColumnColorCondition
 from builders.color_pipeline_builder import ColorPipelineBuilder
 from enums.columns import CliTableColumn
@@ -37,7 +37,14 @@ class TablePainterBuilder:
 
         return self
 
+    def build_colors(self, colors: Dict[CliTableColumn, List[NumberColumnColorCondition]]) -> Self:
+        """Set color for columns from dictionary"""
+        for column_name in colors.keys():
+            self.set_number_column_color(column_name, colors[column_name])
+
+        return self
+
     @property
-    def rows(self):
+    def rows(self) -> List[List[Any]]:
         """Property accessor for rows"""
         return self._rows
