@@ -1,9 +1,9 @@
 """Command options decorators"""
 from click import option, Command
 
-from command_interface.help_text import COMMAND_OPTION_COLUMN_NAMES, COLUMN_OPTION_EXAMPLE, \
-    AVAILABLE_SORT, SORT_OPTION_EXAMPLE, AVAILABLE_CELL_COLORS
-from defaults.command import DEFAULT_COLUMNS, DEFAULT_SORT, DEFAULT_COLORS
+from command_interface.help_text import COMMAND_OPTION_COLUMN_NAMES_TEXT, COLUMN_OPTION_EXAMPLE, \
+    SORT_OPTION_EXAMPLE, AVAILABLE_CELL_COLORS_TEXT, AVAILABLE_SORT_TEXT, AVAILABLE_SIGNS_TEXT
+from defaults.command import DEFAULT_COLUMNS, DEFAULT_SORT, DEFAULT_COLORS, DEFAULT_FILTERS
 
 
 def columns_option(func) -> Command:
@@ -12,7 +12,7 @@ def columns_option(func) -> Command:
         "--columns",
         default=DEFAULT_COLUMNS,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES}
+            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
             Example of input: --columns={COLUMN_OPTION_EXAMPLE}
         """
     )(func)
@@ -24,8 +24,8 @@ def sort_option(func) -> Command:
         "--sort",
         default=DEFAULT_SORT,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES}
-            Sort variants: ${AVAILABLE_SORT}
+            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
+            Sort variants: ${AVAILABLE_SORT_TEXT}
             Example of input: --sort={SORT_OPTION_EXAMPLE}
         """
     )(func)
@@ -37,8 +37,21 @@ def colors_option(func) -> Command:
         "--colors",
         default=DEFAULT_COLORS,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES}
-            Available colors: ${AVAILABLE_CELL_COLORS}
+            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
+            Available colors: ${AVAILABLE_CELL_COLORS_TEXT}
             Example of input: --colors=daratio-0,0.15,green/0.15,0.3,yellow/0.3,,red;
+        """
+    )(func)
+
+
+def filter_option(func) -> Command:
+    """Filters option decorator"""
+    return option(
+        "--filters",
+        default=DEFAULT_FILTERS,
+        help=f"""
+            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
+            Available sings: ${AVAILABLE_SIGNS_TEXT}
+            Example of input: --filters="linecount>50 and daratio>0.5"
         """
     )(func)
