@@ -1,21 +1,13 @@
 """Help text generation"""
-from enums.columns import CliTableColumn, CliTableColumnColor, SortingDirection
+from command_interface.parameter_lists import COMMAND_OPTION_COLUMN_NAMES, \
+    AVAILABLE_CELL_COLORS, AVAILABLE_SORT, AVAILABLE_SIGNS
+from enums.columns import CliTableColumn
 
-COMMAND_OPTION_COLUMN_NAMES = list(
-    filter(lambda field: not field.startswith('_'), dir(CliTableColumn))
-)
-AVAILABLE_CELL_COLORS = list(
-    map(
-        lambda color: color.lower(),
-        filter(lambda field: not field.startswith('_'), dir(CliTableColumnColor))
-    )
-)
-AVAILABLE_SORT = list(
-    map(
-        lambda color: color.lower(),
-        filter(lambda field: not field.startswith('_'), dir(SortingDirection))
-    )
-)
+
 COLUMN_OPTION_EXAMPLE = f"{CliTableColumn.FILE_NAME.value},{CliTableColumn.LINE_COUNT.value}"
 SORT_OPTION_EXAMPLE = f"{CliTableColumn.FILE_NAME.value}-asc," \
     f"{CliTableColumn.LINE_COUNT.value}-desc"
+COMMAND_OPTION_COLUMN_NAMES_TEXT = ", ".join(COMMAND_OPTION_COLUMN_NAMES)
+AVAILABLE_CELL_COLORS_TEXT = ", ".join(AVAILABLE_CELL_COLORS)
+AVAILABLE_SORT_TEXT = ", ".join(AVAILABLE_SORT)
+AVAILABLE_SIGNS_TEXT = ", ".join(AVAILABLE_SIGNS)

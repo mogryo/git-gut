@@ -4,6 +4,8 @@ from sqlalchemy import select, Select, asc, desc
 from enums.columns import CliTableColumn, SortingDirection
 from orm.git_stat import GitStat
 from app_types.dataclasses import SortingRule
+from query_option_parser.nodes import ConditionNode
+from query_option_parser.transformers import transform_condition_nodes_to_filters
 
 
 def prepare_all_rows(column_names: List[CliTableColumn], rows: List[List[Any]]) -> List[GitStat]:
@@ -45,3 +47,11 @@ def prepare_order_by(sorting_rules: List[SortingRule], select_statement: Select)
         order_by_list.append(order_direction(COLUMN_TO_GIT_STAT_MAPPING[rule.column_name.value]))
 
     return select_statement.order_by(*order_by_list)
+
+
+def prepare_where(condition_nodes: List[ConditionNode], select_statement: Select) -> Select:
+    """Add filtering to select statement"""
+    if len(condition_nodes) > 0:
+        return select_statement.where(transform_condition_nodes_to_filters(condition_nodes))
+
+    return select_statement

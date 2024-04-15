@@ -9,12 +9,13 @@ from builders.color_pipeline_builder import ColorPipelineBuilder
 from builders.column_data_builder import ColumnDataBuilder
 from builders.table_data_builder import TableDataBuilder
 from builders.table_painter_builder import TablePainterBuilder
-from command_interface.options import columns_option, sort_option, colors_option
+from command_interface.options import columns_option, sort_option, colors_option, filter_option
+from query_option_parser.parser import parse_where_statement
 from utils.cli_table import draw_flat_tree_table
 from utils.command_option_parser import parse_option_columns, parse_option_sort, parse_option_color
 from utils.database import create_db_engine, create_tables
 from repositories.git_stat_repo import prepare_all_rows, prepare_select,\
-    prepare_order_by
+    prepare_order_by, prepare_where
 
 
 @click.command()
@@ -22,7 +23,14 @@ from repositories.git_stat_repo import prepare_all_rows, prepare_select,\
 @columns_option
 @sort_option
 @colors_option
-def git_hot(repo_path: str, columns: Optional[str], sort: Optional[str], colors: Optional[str]):
+@filter_option
+def git_hot(
+        repo_path: str,
+        columns: Optional[str],
+        sort: Optional[str],
+        colors: Optional[str],
+        filters: Optional[str],
+):
     """Command entry point"""
     engine = create_db_engine()
     create_tables(engine)
@@ -41,6 +49,7 @@ def git_hot(repo_path: str, columns: Optional[str], sort: Optional[str], colors:
 
         select_statement = prepare_select(column_names)
         select_statement = prepare_order_by(parse_option_sort(sort), select_statement)
+        select_statement = prepare_where(parse_where_statement(filters), select_statement)
 
         sorted_rows = session.execute(select_statement)
 
