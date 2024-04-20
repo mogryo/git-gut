@@ -1,5 +1,5 @@
 """Test is_number"""
-from query_option_parser.parser import is_number
+from utils.numbers import is_number
 
 
 def test_valid_float_number() -> None:

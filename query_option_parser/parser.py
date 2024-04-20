@@ -9,6 +9,7 @@ from query_option_parser.string_tokens import ALLOWED_SIGNS, TEXT_SIGNS,\
     TOP_LEVEL_STATEMENT_KEYWORDS
 from command_interface.help_text import COMMAND_OPTION_COLUMN_NAMES
 from utils.command_option_parser import REVERSE_COLUMN_NAME_MAPPING
+from utils.numbers import is_number
 
 
 def is_column_name(text: str) -> bool:
@@ -24,15 +25,6 @@ def is_sign(text: str) -> bool:
 def is_text_sign(text: str) -> bool:
     """Check if text is a sign, which can be applied to a text"""
     return text in TEXT_SIGNS
-
-
-def is_number(text: str) -> bool:
-    """Check if text is a number"""
-    try:
-        float(text)
-        return True
-    except ValueError:
-        return False
 
 
 def is_allowed_condition(column_name: str, sign: str, constant_part: str) -> bool:
