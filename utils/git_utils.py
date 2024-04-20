@@ -4,6 +4,7 @@ from functools import cache
 from statistics import mode
 from git import Tree, Git
 from app_types.dataclasses import FileCommitStats
+from utils.numbers import is_number
 from utils.text import trim_side_quotes
 
 
@@ -40,8 +41,8 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
         split_stat = commit_info[1].split()
         result.append(
             FileCommitStats(
-                added_lines=int(split_stat[0]),
-                removed_lines=int(split_stat[1]),
+                added_lines=int(split_stat[0] if is_number(split_stat[0]) else 0),
+                removed_lines=int(split_stat[1] if is_number(split_stat[1]) else 0),
                 author=commit_info[0])
         )
 
