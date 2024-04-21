@@ -4,11 +4,10 @@ from typing import List, Optional, Tuple
 
 from enums.columns import SortingDirection, CliTableColumn
 from query_option_parser.nodes import ConditionNode, ShowNode, OrderNode, SortRuleNode,\
-    StatementNode, FromNode, WhereNode
-from query_option_parser.string_tokens import ALLOWED_SIGNS, TEXT_SIGNS,\
-    TOP_LEVEL_STATEMENT_KEYWORDS
+    FromNode, WhereNode
+from query_option_parser.string_tokens import ALLOWED_SIGNS, TEXT_SIGNS
 from command_interface.help_text import COMMAND_OPTION_COLUMN_NAMES
-from utils.command_option_parser import REVERSE_COLUMN_NAME_MAPPING
+from utils.mappings import REVERSE_COLUMN_NAME_MAPPING
 from utils.numbers import is_number
 
 
@@ -145,27 +144,3 @@ ROOT_NODE_KEYS = {
     'WHERE': "where_node",
     'ORDERBY': "order_node",
 }
-
-
-def parse_root_statement(statement: Optional[str] = "") -> StatementNode:
-    """Parse whole statement"""
-    active_statement: str | None = None
-    accumulated_text: List[str] = []
-    root_node = StatementNode(None, None, None, None)
-
-    split_text = statement.split()
-    for index, word in enumerate(split_text):
-        if word not in TOP_LEVEL_STATEMENT_KEYWORDS:
-            accumulated_text.append(word)
-        if word in TOP_LEVEL_STATEMENT_KEYWORDS or (index + 1) == len(split_text):
-            if active_statement in TOP_LEVEL_STATEMENT_PARSERS:
-                node = TOP_LEVEL_STATEMENT_PARSERS[active_statement](' '.join(accumulated_text))
-                setattr(root_node, ROOT_NODE_KEYS[active_statement], node)
-                accumulated_text.clear()
-            active_statement = word
-
-    return root_node
-
-
-if __name__ == "__main__":
-    parse_root_statement("SHOW linecount, daratio")
