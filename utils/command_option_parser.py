@@ -2,23 +2,11 @@
 from typing import List, Optional, Dict
 
 from app_types.dataclasses import SortingRule, NumberColumnColorCondition
-from enums.columns import CliTableColumn, SortingDirection, CliTableColumnColor
-
-REVERSE_COLUMN_NAME_MAPPING = {
-    cli_table_column.value: cli_table_column for cli_table_column in CliTableColumn
-}
-
-REVERSE_SORTING_MAPPING = {
-    sorting_direction.value: sorting_direction for sorting_direction in SortingDirection
-}
-
-COLOR_MAPPING = {
-    color_enum_string.upper(): CliTableColumnColor[
-        color_enum_string
-    ] for color_enum_string in list(
-        filter(lambda field: not field.startswith('_'), dir(CliTableColumnColor))
-    )
-}
+from enums.columns import CliTableColumn
+from query_option_parser.nodes import StatementNode
+from query_option_parser.parser import TOP_LEVEL_STATEMENT_PARSERS, ROOT_NODE_KEYS
+from query_option_parser.string_tokens import TOP_LEVEL_STATEMENT_KEYWORDS
+from utils.mappings import REVERSE_COLUMN_NAME_MAPPING, REVERSE_SORTING_MAPPING, COLOR_MAPPING
 
 
 def parse_option_columns(columns_string: str) -> List[CliTableColumn]:
@@ -87,3 +75,23 @@ def parse_option_color(
         result[REVERSE_COLUMN_NAME_MAPPING[column_name]] = color_conditions
 
     return result
+
+
+def parse_option_query(statement: Optional[str] = "") -> StatementNode:
+    """Parse whole statement"""
+    active_statement: str | None = None
+    accumulated_text: List[str] = []
+    root_node = StatementNode(None, None, None, None)
+
+    split_text = statement.split()
+    for index, word in enumerate(split_text):
+        if word not in TOP_LEVEL_STATEMENT_KEYWORDS:
+            accumulated_text.append(word)
+        if word in TOP_LEVEL_STATEMENT_KEYWORDS or (index + 1) == len(split_text):
+            if active_statement in TOP_LEVEL_STATEMENT_PARSERS:
+                node = TOP_LEVEL_STATEMENT_PARSERS[active_statement](' '.join(accumulated_text))
+                setattr(root_node, ROOT_NODE_KEYS[active_statement], node)
+                accumulated_text.clear()
+            active_statement = word
+
+    return root_node

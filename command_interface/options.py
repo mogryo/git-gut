@@ -55,3 +55,20 @@ def filter_option(func) -> Command:
             Example of input: --filters="linecount>50 and daratio>0.5"
         """
     )(func)
+
+
+def query_option(func) -> Command:
+    """Query option decorator"""
+    return option(
+        "--query",
+        default="",
+        help=f"""
+            Provide query
+            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
+            Sort variants: ${AVAILABLE_SORT_TEXT}
+            Available sings: ${AVAILABLE_SIGNS_TEXT}
+            Example of input: SHOW linecount, daratio FROM ./ WHERE linecount > 100 and daratio < 1
+            ORDER BY daratio ASC and linecount DESC
+            Note! When query option provided, options: columns, filters, sort - are ignored
+        """
+    )(func)

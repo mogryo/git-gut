@@ -4,8 +4,9 @@ from sqlalchemy import select, Select, asc, desc
 from enums.columns import CliTableColumn, SortingDirection
 from orm.git_stat import GitStat
 from app_types.dataclasses import SortingRule
-from query_option_parser.nodes import WhereNode
-from query_option_parser.transformers import transform_condition_nodes_to_filters
+from query_option_parser.nodes import WhereNode, OrderNode, StatementNode, ShowNode
+from query_option_parser.transformers import transform_condition_nodes_to_filters,\
+    transform_sort_nodes_to_order_by, transform_show_node_to_select
 
 
 def prepare_all_rows(column_names: List[CliTableColumn], rows: List[List[Any]]) -> List[GitStat]:
@@ -39,6 +40,11 @@ def prepare_select(column_names: List[CliTableColumn]) -> Select:
     return select(*git_stat_columns)
 
 
+def prepare_select_from_node(show_node: ShowNode) -> Select:
+    """Prepare select statement for specified columns"""
+    return select(*transform_show_node_to_select(show_node))
+
+
 def prepare_order_by(sorting_rules: List[SortingRule], select_statement: Select) -> Select:
     """Add sorting to select statement"""
     order_by_list = []
@@ -55,5 +61,24 @@ def prepare_where(where_node: WhereNode, select_statement: Select) -> Select:
         return select_statement.where(
             transform_condition_nodes_to_filters(where_node.condition_nodes)
         )
+
+    return select_statement
+
+
+def prepare_order_by_from_node(orderby_node: OrderNode, select_statement: Select) -> Select:
+    """Add sorting to select statement"""
+    if len(orderby_node.sort_rule_nodes) > 0:
+        return select_statement.order_by(
+            *transform_sort_nodes_to_order_by(orderby_node.sort_rule_nodes)
+        )
+
+    return select_statement
+
+
+def prepare_query_statement(root_node: StatementNode) -> Select:
+    """Prepare query statement"""
+    select_statement = prepare_select_from_node(root_node.show_node)
+    select_statement = prepare_where(root_node.where_node, select_statement)
+    select_statement = prepare_order_by_from_node(root_node.order_node, select_statement)
 
     return select_statement
