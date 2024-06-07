@@ -12,7 +12,7 @@ def columns_option(func) -> Command:
         "--columns",
         default=DEFAULT_COLUMNS,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
+            Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
             Example of input: --columns={COLUMN_OPTION_EXAMPLE}
         """
     )(func)
@@ -24,8 +24,8 @@ def sort_option(func) -> Command:
         "--sort",
         default=DEFAULT_SORT,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
-            Sort variants: ${AVAILABLE_SORT_TEXT}
+            Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
+            Sort variants: {AVAILABLE_SORT_TEXT}\n
             Example of input: --sort={SORT_OPTION_EXAMPLE}
         """
     )(func)
@@ -37,8 +37,8 @@ def colors_option(func) -> Command:
         "--colors",
         default=DEFAULT_COLORS,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
-            Available colors: ${AVAILABLE_CELL_COLORS_TEXT}
+            Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
+            Available colors: {AVAILABLE_CELL_COLORS_TEXT}\n
             Example of input: --colors=daratio-0,0.15,green/0.15,0.3,yellow/0.3,,red;
         """
     )(func)
@@ -50,8 +50,8 @@ def filter_option(func) -> Command:
         "--filters",
         default=DEFAULT_FILTERS,
         help=f"""
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
-            Available sings: ${AVAILABLE_SIGNS_TEXT}
+            Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
+            Available sings: {AVAILABLE_SIGNS_TEXT}\n
             Example of input: --filters="linecount>50 and daratio>0.5"
         """
     )(func)
@@ -63,12 +63,12 @@ def query_option(func) -> Command:
         "--query",
         default="",
         help=f"""
-            Provide query
-            Column names: ${COMMAND_OPTION_COLUMN_NAMES_TEXT}
-            Sort variants: ${AVAILABLE_SORT_TEXT}
-            Available sings: ${AVAILABLE_SIGNS_TEXT}
-            Example of input: SHOW linecount, daratio FROM ./ WHERE linecount > 100 and daratio < 1
-            ORDER BY daratio ASC and linecount DESC
+            Provide query\n
+            Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
+            Sort variants: {AVAILABLE_SORT_TEXT}\n
+            Available sings: {AVAILABLE_SIGNS_TEXT}\n
+            Example of input: SHOW linecount, daratio FROM ./ WHERE linecount > 100 and daratio < 1\n
+            ORDER BY daratio ASC and linecount DESC\n
             Note! When query option provided, options: columns, filters, sort - are ignored
         """
     )(func)
