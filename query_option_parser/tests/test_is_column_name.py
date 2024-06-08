@@ -1,4 +1,5 @@
 """Test is_column_name"""
+
 from enums.columns import CliTableColumn
 from query_option_parser.parser import is_column_name
 

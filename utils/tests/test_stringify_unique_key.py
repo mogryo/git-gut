@@ -1,4 +1,5 @@
 """Test stringify_unique_key"""
+
 import pytest
 from utils.id_generator import stringify_unique_key
 

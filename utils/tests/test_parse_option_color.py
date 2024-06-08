@@ -1,4 +1,5 @@
 """Test parse_option_color"""
+
 from app_types.dataclasses import NumberColumnColorCondition
 from utils.command_option_parser import parse_option_color
 from enums.columns import CliTableColumn
@@ -16,18 +17,14 @@ def test_empty_string() -> None:
 
 def test_omit_end_range() -> None:
     """Test that omitting end range is valid (meaning till infinity)"""
-    colors = parse_option_color(
-        "daratio-1,,red;"
-    )
+    colors = parse_option_color("daratio-1,,red;")
 
     assert colors[CliTableColumn.DELETED_ADDED_RATIO][0].end is None
 
 
 def test_single_color_condition() -> None:
     """Test single condition"""
-    colors = parse_option_color(
-        "daratio-0,0.15,green/0.15,0.3,yellow/0.3,,red;"
-    )
+    colors = parse_option_color("daratio-0,0.15,green/0.15,0.3,yellow/0.3,,red;")
 
     assert len(colors[CliTableColumn.DELETED_ADDED_RATIO]) == 3
     for condition in colors[CliTableColumn.DELETED_ADDED_RATIO]:

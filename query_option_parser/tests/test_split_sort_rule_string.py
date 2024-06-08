@@ -1,4 +1,5 @@
 """Test split_sort_rule_string"""
+
 from enums.columns import CliTableColumn, SortingDirection
 from query_option_parser.parser import split_sort_rule_string
 

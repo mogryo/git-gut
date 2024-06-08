@@ -1,4 +1,5 @@
 """Test is_number"""
+
 from utils.numbers import is_number
 
 

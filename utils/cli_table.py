@@ -1,4 +1,5 @@
 """Table functions"""
+
 from typing import Optional, List, Any
 from app_types.protocols import CliTable
 from enums.columns import CliTableColumnLabel, CliTableColumn
@@ -18,7 +19,9 @@ def draw_flat_tree_table(
     :return: None
     """
     pretty_table.field_names = [CliTableColumnLabel.ID.value.upper()] + list(
-        map(lambda x: CliTableColumnLabel[x.value.upper()].value, column_technical_names)
+        map(
+            lambda x: CliTableColumnLabel[x.value.upper()].value, column_technical_names
+        )
     )
     unique_keys = generate_unique_keys(
         start_key=1, end_key=len(rows), key_length=len(str(len(rows)))

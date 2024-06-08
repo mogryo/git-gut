@@ -1,4 +1,5 @@
 """Test parse_order_statement"""
+
 from enums.columns import CliTableColumn, SortingDirection
 from query_option_parser.parser import parse_order_statement
 

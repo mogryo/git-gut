@@ -1,4 +1,5 @@
 """Git utils"""
+
 from typing import List, Callable
 from functools import cache
 from statistics import mode
@@ -32,7 +33,9 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     :param filepath: File path.
     :return: Return list of stats.
     """
-    raw_result: str = git_instance.log("--follow", "--numstat", "--format=\"%an\"", '--', filepath)
+    raw_result: str = git_instance.log(
+        "--follow", "--numstat", '--format="%an"', "--", filepath
+    )
     separate_lines = list(filter(lambda x: x != "", raw_result.splitlines()))
     commit_list = list(zip(separate_lines[::2], separate_lines[1::2]))
 
@@ -43,7 +46,8 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
             FileCommitStats(
                 added_lines=int(split_stat[0] if is_number(split_stat[0]) else 0),
                 removed_lines=int(split_stat[1] if is_number(split_stat[1]) else 0),
-                author=commit_info[0])
+                author=commit_info[0],
+            )
         )
 
     return result
@@ -61,7 +65,7 @@ def get_most_frequent_author(git_instance: Git, file_name: str) -> str:
 
 
 def get_top_author_by_stat(
-        git_instance: Git, file_name: str, func: Callable[[FileCommitStats], int]
+    git_instance: Git, file_name: str, func: Callable[[FileCommitStats], int]
 ) -> str:
     """
     Functions calculates top author,
@@ -78,4 +82,4 @@ def get_top_author_by_stat(
     top_author = max(authors_data, key=authors_data.get)
     author_total_sum = authors_data[top_author]
 
-    return f'{trim_side_quotes(top_author)} ({author_total_sum})'
+    return f"{trim_side_quotes(top_author)} ({author_total_sum})"

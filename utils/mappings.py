@@ -1,4 +1,5 @@
 """Utils mappings"""
+
 from enums.columns import CliTableColumn, SortingDirection, CliTableColumnColor
 
 REVERSE_COLUMN_NAME_MAPPING = {
@@ -10,9 +11,8 @@ REVERSE_SORTING_MAPPING = {
 }
 
 COLOR_MAPPING = {
-    color_enum_string.upper(): CliTableColumnColor[
-        color_enum_string
-    ] for color_enum_string in list(
-        filter(lambda field: not field.startswith('_'), dir(CliTableColumnColor))
+    color_enum_string.upper(): CliTableColumnColor[color_enum_string]
+    for color_enum_string in list(
+        filter(lambda field: not field.startswith("_"), dir(CliTableColumnColor))
     )
 }

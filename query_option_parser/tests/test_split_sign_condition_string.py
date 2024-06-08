@@ -1,4 +1,5 @@
 """Test split_sign_condition_string"""
+
 from query_option_parser.parser import split_sign_condition_string
 
 

@@ -1,4 +1,5 @@
 """Builder for table"""
+
 from collections import OrderedDict
 from typing import Self, List, Any
 from builders.column_data_builder import ColumnDataBuilder
@@ -7,6 +8,7 @@ from enums.columns import CliTableColumn
 
 class TableDataBuilder:
     """Builder for table data"""
+
     def __init__(self, column_builder: ColumnDataBuilder):
         """Initialize builder"""
         self._column_builder = column_builder

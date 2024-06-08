@@ -1,4 +1,5 @@
 """Test parse_show_statement"""
+
 from enums.columns import CliTableColumn
 from query_option_parser.parser import parse_show_statement
 
