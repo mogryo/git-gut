@@ -1,4 +1,4 @@
-name: Pylint
+name: Code style
 
 on: [push]
 
@@ -24,3 +24,6 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         poetry run pylint $(git ls-files '*.py')
+    - name: Analysing the code with black
+      run: |
+        poetry run black --check ./
