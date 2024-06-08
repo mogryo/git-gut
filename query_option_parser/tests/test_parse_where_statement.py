@@ -1,4 +1,5 @@
 """Test parse_where_statement"""
+
 from query_option_parser.nodes import ConditionNode
 from query_option_parser.parser import parse_where_statement
 

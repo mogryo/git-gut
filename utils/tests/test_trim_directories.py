@@ -1,4 +1,5 @@
 """Test trim_directories."""
+
 from utils.filesystem import trim_directories
 
 

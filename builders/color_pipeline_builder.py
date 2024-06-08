@@ -1,10 +1,12 @@
 """Builder pattern for column color"""
+
 from typing import Self, List, Callable
 from enums.columns import CliTableColumnColor
 
 
 class ColorPipelineBuilder:
     """Builder for column color"""
+
     def __init__(self):
         self._pipe: List[Callable[[str], CliTableColumnColor]] = []
 
@@ -13,17 +15,13 @@ class ColorPipelineBuilder:
         if top < bottom:
             raise ValueError("Value top cannot be less than bottom")
 
-        self._pipe.append(
-            lambda value: color if bottom <= float(value) < top else None
-        )
+        self._pipe.append(lambda value: color if bottom <= float(value) < top else None)
 
         return self
 
     def from_value(self, bottom: float, color: CliTableColumnColor) -> Self:
         """Set color from value to infinity"""
-        self._pipe.append(
-            lambda value: color if bottom <= float(value) else None
-        )
+        self._pipe.append(lambda value: color if bottom <= float(value) else None)
 
         return self
 

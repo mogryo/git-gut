@@ -1,4 +1,5 @@
 """Utils for file names and directories"""
+
 from typing import List
 import re
 
@@ -23,6 +24,8 @@ def trim_directories(path: str, required_dir_amount: int) -> str:
     :param required_dir_amount: How many directories to leave in the path.
     :return:
     """
-    pathname_list = list(filter(lambda split_path: len(split_path) > 0, path.split("/")))
-    required_amount_list = pathname_list[-(required_dir_amount + 1):]
-    return '/'.join(required_amount_list)
+    pathname_list = list(
+        filter(lambda split_path: len(split_path) > 0, path.split("/"))
+    )
+    required_amount_list = pathname_list[-(required_dir_amount + 1) :]
+    return "/".join(required_amount_list)

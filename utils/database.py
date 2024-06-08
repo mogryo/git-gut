@@ -1,4 +1,5 @@
 """Utils for database"""
+
 from sqlalchemy import create_engine, Engine
 from orm.git_stat import Base
 

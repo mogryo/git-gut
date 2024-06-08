@@ -1,9 +1,11 @@
 """Protocol classes for application"""
+
 from typing import Protocol, List, Any
 
 
 class CliTable(Protocol):
     """Protocol class for common table interface."""
+
     def __init__(self):
         self._field_names: List[str] = []
 

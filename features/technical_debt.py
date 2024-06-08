@@ -1,4 +1,5 @@
 """Functions to calculate different technical debt levels"""
+
 from typing import List
 from statistics import mean
 from app_types.dataclasses import FileCommitStats
@@ -6,6 +7,7 @@ from app_types.dataclasses import FileCommitStats
 
 def calculate_deleted_added_ratio(commit_stats: List[FileCommitStats]) -> float:
     """Calculates ratio: deleted lines/added lines"""
+
     def parse_zero(number: int) -> int:
         """Local function to replace zero as 1"""
         return number if number != 0 else 1

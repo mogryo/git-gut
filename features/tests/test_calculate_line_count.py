@@ -1,4 +1,5 @@
 """Test calculate_line_count"""
+
 from features.technical_debt import calculate_line_count
 from app_types.dataclasses import FileCommitStats
 
@@ -10,13 +11,17 @@ def test_empty_list() -> None:
 
 def test_more_lines_deleted() -> None:
     """Test when more lines deleted"""
-    assert calculate_line_count([
-        FileCommitStats(10, 100, ""), FileCommitStats(10, 50, "")
-    ]) == -130
+    assert (
+        calculate_line_count(
+            [FileCommitStats(10, 100, ""), FileCommitStats(10, 50, "")]
+        )
+        == -130
+    )
 
 
 def test_more_lines_added() -> None:
     """Test when more lines deleted"""
-    assert calculate_line_count([
-        FileCommitStats(100, 5, ""), FileCommitStats(10, 5, "")
-    ]) == 100
+    assert (
+        calculate_line_count([FileCommitStats(100, 5, ""), FileCommitStats(10, 5, "")])
+        == 100
+    )

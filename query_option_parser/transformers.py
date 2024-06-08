@@ -1,4 +1,5 @@
 """Transform nodes into sqlalchemy objects, queries, statements"""
+
 from typing import List
 from sqlalchemy import and_, ColumnElement, asc, desc, UnaryExpression
 
@@ -27,7 +28,9 @@ def transform_condition_nodes_to_filters(
     condition_nodes: List[ConditionNode],
 ) -> ColumnElement[bool]:
     """Transform all condition nodes to filters, joined by and"""
-    return and_(*[map_sign_to_filter(condition_node) for condition_node in condition_nodes])
+    return and_(
+        *[map_sign_to_filter(condition_node) for condition_node in condition_nodes]
+    )
 
 
 COLUMN_TO_GIT_STAT_MAPPING = {
@@ -41,7 +44,9 @@ def transform_sort_nodes_to_order_by(
     """Transform all sort rule nodes to order by"""
     order_by_list = []
     for rule_node in sort_rule_nodes:
-        order_direction = asc if rule_node.sort_direction == SortingDirection.ASC else desc
+        order_direction = (
+            asc if rule_node.sort_direction == SortingDirection.ASC else desc
+        )
         order_by_list.append(
             order_direction(COLUMN_TO_GIT_STAT_MAPPING[rule_node.column_name.value]),
         )
