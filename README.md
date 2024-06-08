@@ -27,7 +27,10 @@ poetry run python main.py --query="SHOW linecount, daratio FROM ./ WHERE linecou
 Right now it's not optimized to be used on big and long running repositories.
 
 ## Local development
-Project has various tools setup for code styling (pylint + black)
+Project has various tools setup for code styling 
+1. Pylint - https://pylint.readthedocs.io/
+2. Black - https://black.readthedocs.io/
+
 To check code style you can run
 ```bash
 poetry run pylint $(git ls-files '*.py')
