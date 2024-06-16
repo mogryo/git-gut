@@ -1,5 +1,6 @@
 """Parser generated nodes"""
 
+import ast
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -35,7 +36,7 @@ class ShowNode:
 class WhereNode:
     """Where clause statement"""
 
-    condition_nodes: List[ConditionNode]
+    condition_node: Optional[ast.BoolOp]
 
 
 @dataclass

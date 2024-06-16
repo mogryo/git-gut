@@ -7,7 +7,7 @@ from orm.git_stat import GitStat
 from app_types.dataclasses import SortingRule
 from query_option_parser.nodes import WhereNode, OrderNode, StatementNode, ShowNode
 from query_option_parser.transformers import (
-    transform_condition_nodes_to_filters,
+    transform_ast_bool_op_to_orm_filters,
     transform_sort_nodes_to_order_by,
     transform_show_node_to_select,
 )
@@ -65,9 +65,9 @@ def prepare_order_by(
 
 def prepare_where(where_node: WhereNode, select_statement: Select) -> Select:
     """Add filtering to select statement"""
-    if len(where_node.condition_nodes) > 0:
+    if where_node.condition_node is not None:
         return select_statement.where(
-            transform_condition_nodes_to_filters(where_node.condition_nodes)
+            transform_ast_bool_op_to_orm_filters(where_node.condition_node)
         )
 
     return select_statement

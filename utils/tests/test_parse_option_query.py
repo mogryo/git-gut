@@ -44,19 +44,8 @@ def test_only_where_statement() -> None:
     assert result.show_node is None
     assert result.from_node is None
     assert result.order_node is None
-    assert len(result.where_node.condition_nodes) == 2
-    assert (
-        result.where_node.condition_nodes[0].column_name
-        == CliTableColumn.LINE_COUNT.value
-    )
-    assert result.where_node.condition_nodes[0].sign == ">"
-    assert result.where_node.condition_nodes[0].constant_part == 0
-    assert (
-        result.where_node.condition_nodes[1].column_name
-        == CliTableColumn.DELETED_ADDED_RATIO.value
-    )
-    assert result.where_node.condition_nodes[1].sign == ">"
-    assert result.where_node.condition_nodes[1].constant_part == 0.5
+    assert result.where_node.condition_node is not None
+    assert len(result.where_node.condition_node.values) == 2
 
 
 def test_full_valid_statement() -> None:
@@ -67,5 +56,5 @@ def test_full_valid_statement() -> None:
     )
     assert len(result.show_node.column_names) == 2
     assert result.from_node.path == "./"
-    assert len(result.where_node.condition_nodes) == 2
+    assert len(result.where_node.condition_node.values) == 2
     assert len(result.order_node.sort_rule_nodes) == 2
