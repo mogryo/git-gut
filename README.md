@@ -26,6 +26,9 @@ poetry run python main.py --query="SHOW linecount, daratio FROM ./ WHERE linecou
 ## Word of caution
 Right now it's not optimized to be used on big and long running repositories.
 
+## Documentation
+[Query statement](./readmes/query-docs.md)
+
 ## Local development
 Project has various tools setup for code styling 
 1. Pylint - https://pylint.readthedocs.io/
