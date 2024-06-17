@@ -1,6 +1,6 @@
 """Git utils"""
 
-from typing import List, Callable, Set
+from typing import List, Callable
 from functools import cache
 from statistics import mode
 from git import Tree, Git
@@ -101,7 +101,7 @@ def get_non_text_files(git_instance: Git, filepath: str) -> List[str]:
     :param filepath: File path.
     :return: List of file names.
     """
-    existing_files: Set[str] = set(git_instance.ls_files().split())
+    existing_files: List[str] = git_instance.ls_files().split()
     result: List[str] = []
 
     for existing_file in existing_files:
