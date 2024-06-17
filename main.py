@@ -97,7 +97,7 @@ def process_separate_options(
 def process_terminating_options(repo_path: str, non_text: bool) -> bool:
     """Process options, after which all other options are ignored"""
     if non_text:
-        non_text_files = get_non_text_files(Git(repo_path), repo_path)
+        non_text_files = get_non_text_files(Git(repo_path))
         if len(non_text_files) > 0:
             print("Non-text files:")
             print("\n".join(non_text_files))

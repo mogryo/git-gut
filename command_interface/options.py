@@ -91,7 +91,7 @@ def non_text_files_option(func) -> Command:
     return option(
         "--nontext",
         is_flag=True,
-        help=f"""
+        help="""
             List all non-text files which are in GIT repository
             (includes only committed files)
             Note! When nontext option provided, all other options are ignored
