@@ -17,6 +17,7 @@ from command_interface.options import (
     colors_option,
     filter_option,
     query_option,
+    non_text_files_option,
 )
 from enums.columns import CliTableColumn
 from query_option_parser.parser import parse_where_statement
@@ -27,6 +28,7 @@ from utils.command_option_parser import (
     parse_option_color,
     parse_option_query,
 )
+from utils.git_utils import get_non_text_files
 from utils.database import create_db_engine, create_tables
 from repositories.git_stat_repo import (
     prepare_all_rows,
@@ -92,6 +94,20 @@ def process_separate_options(
     return column_names, sorted_rows
 
 
+def process_terminating_options(repo_path: str, non_text: bool) -> bool:
+    """Process options, after which all other options are ignored"""
+    if non_text:
+        non_text_files = get_non_text_files(Git(repo_path), repo_path)
+        if len(non_text_files) > 0:
+            print("Non-text files")
+            print(non_text_files)
+        else:
+            print("No non-text files have been found!")
+        return True
+
+    return False
+
+
 @click.command()
 @click.argument("repo_path")
 @columns_option
@@ -99,6 +115,7 @@ def process_separate_options(
 @colors_option
 @filter_option
 @query_option
+@non_text_files_option
 # pylint: disable = too-many-arguments
 def git_hot(
     repo_path: str,
@@ -106,9 +123,14 @@ def git_hot(
     sort: Optional[str],
     colors: Optional[str],
     filters: Optional[str],
+    nontext: bool,
     query: Optional[str],
 ):
     """Command entry point"""
+    is_terminated = process_terminating_options(repo_path, nontext)
+    if is_terminated:
+        return
+
     engine = create_db_engine()
     create_tables(engine)
 

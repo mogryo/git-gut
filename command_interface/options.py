@@ -84,3 +84,16 @@ def query_option(func) -> Command:
             Note! When query option provided, options: columns, filters, sort - are ignored
         """,
     )(func)
+
+
+def non_text_files_option(func) -> Command:
+    """Option to list all non text files in GIT repository"""
+    return option(
+        "--nontext",
+        is_flag=True,
+        help=f"""
+            List all non-text files which are in GIT repository
+            (includes only committed files)
+            Note! When nontext option provided, all other options are ignored
+        """,
+    )(func)
