@@ -94,7 +94,7 @@ def get_top_author_by_stat(
     return f"{trim_side_quotes(top_author)} ({author_total_sum})"
 
 
-def get_non_text_files(git_instance: Git, filepath: str) -> List[str]:
+def get_non_text_files(git_instance: Git) -> List[str]:
     """
     Get GIT tracked files which are non text (binary).
     :param git_instance: Instance of git.Git
