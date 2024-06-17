@@ -1,6 +1,6 @@
 """Git utils"""
 
-from typing import List, Callable
+from typing import List, Callable, Set
 from functools import cache
 from statistics import mode
 from git import Tree, Git
@@ -25,10 +25,17 @@ def get_flat_file_tree(tree: Tree) -> List[str]:
     return generated_list
 
 
+def is_stat_trackable(split_stat: List[str]) -> bool:
+    """Check if commit stats can be tracked, that is - they are integers"""
+    return (
+        len(split_stat) >= 2 and is_number(split_stat[0]) and is_number(split_stat[1])
+    )
+
+
 @cache
 def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     """
-    Collect number stats about file form git.
+    Collect number stats about file from git.
     :param git_instance: Instance of git.Git
     :param filepath: File path.
     :return: Return list of stats.
@@ -42,13 +49,15 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     result = []
     for commit_info in commit_list:
         split_stat = commit_info[1].split()
-        result.append(
-            FileCommitStats(
-                added_lines=int(split_stat[0] if is_number(split_stat[0]) else 0),
-                removed_lines=int(split_stat[1] if is_number(split_stat[1]) else 0),
-                author=commit_info[0],
+
+        if is_stat_trackable(split_stat):
+            result.append(
+                FileCommitStats(
+                    added_lines=int(split_stat[0]),
+                    removed_lines=int(split_stat[1]),
+                    author=commit_info[0],
+                )
             )
-        )
 
     return result
 
@@ -83,3 +92,33 @@ def get_top_author_by_stat(
     author_total_sum = authors_data[top_author]
 
     return f"{trim_side_quotes(top_author)} ({author_total_sum})"
+
+
+def get_non_text_files(git_instance: Git, filepath: str) -> List[str]:
+    """
+    Get GIT tracked files which are non text (binary).
+    :param git_instance: Instance of git.Git
+    :param filepath: File path.
+    :return: List of file names.
+    """
+    existing_files: Set[str] = set(git_instance.ls_files().split())
+    result: List[str] = []
+
+    for existing_file in existing_files:
+        log_result: str = git_instance.log(
+            "--follow", "--numstat", '--format="%an"', "-n 1", "--", existing_file
+        )
+        separate_lines = list(
+            filter(
+                lambda x: x != "" and not x.startswith('"'),
+                log_result.splitlines(),
+            )
+        )
+
+        for commit_info in separate_lines:
+            split_stat = commit_info.split()
+
+            if not is_stat_trackable(split_stat):
+                result.append(existing_file)
+
+    return result
