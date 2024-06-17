@@ -99,8 +99,8 @@ def process_terminating_options(repo_path: str, non_text: bool) -> bool:
     if non_text:
         non_text_files = get_non_text_files(Git(repo_path), repo_path)
         if len(non_text_files) > 0:
-            print("Non-text files")
-            print(non_text_files)
+            print("Non-text files:")
+            print("\n".join(non_text_files))
         else:
             print("No non-text files have been found!")
         return True
