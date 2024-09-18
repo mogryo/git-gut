@@ -28,7 +28,7 @@ from utils.command_option_parser import (
     parse_option_color,
     parse_option_query,
 )
-from utils.git_utils import get_non_text_files
+from utils.git_utils import get_non_text_files, get_all_files_stats, get_flat_file_tree
 from utils.database import create_db_engine, create_tables
 from repositories.git_stat_repo import (
     prepare_all_rows,
@@ -42,12 +42,17 @@ from repositories.git_stat_repo import (
 def process_query(
     query: Optional[str],
     engine: Engine,
+    repo_path: str,
 ) -> Tuple[List[CliTableColumn], Result]:
     """Process query option provided"""
+    all_files_stats = get_all_files_stats(
+        repo_path, get_flat_file_tree(Repo(repo_path).head.commit.tree)
+    )
+
     root_node = parse_option_query(query)
     table_data_builder = TableDataBuilder(
         ColumnDataBuilder(
-            Git(root_node.from_node.path),
+            all_files_stats,
             Repo(root_node.from_node.path),
             pathname_length=2,
         )
@@ -72,8 +77,12 @@ def process_separate_options(
     repo_path: str,
 ) -> Tuple[List[CliTableColumn], Result]:
     """Process separate options: columns, sort, filters"""
+    all_files_stats = get_all_files_stats(
+        repo_path, get_flat_file_tree(Repo(repo_path).head.commit.tree)
+    )
+
     table_data_builder = TableDataBuilder(
-        ColumnDataBuilder(Git(repo_path), Repo(repo_path), pathname_length=2)
+        ColumnDataBuilder(all_files_stats, Repo(repo_path), pathname_length=2)
     )
     column_names = parse_option_columns(columns)
     data_rows = table_data_builder.build_data(column_names).rows
@@ -135,7 +144,7 @@ def git_hot(
     create_tables(engine)
 
     column_names, result_rows = (
-        process_query(query, engine)
+        process_query(query, engine, repo_path)
         if query is not None and query.strip() != ""
         else process_separate_options(columns, sort, filters, engine, repo_path)
     )

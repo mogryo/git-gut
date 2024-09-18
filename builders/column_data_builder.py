@@ -2,13 +2,13 @@
 
 from typing import Unpack, List, Self, Callable, Dict
 from collections import OrderedDict
-from git import Git, Repo
+from git import Repo
+from app_types.dataclasses import FileCommitStats
 from app_types.utils import ColumnBuilderKwargs
 from decorators.column_building_method import column_building_method
 from enums.columns import CliTableColumn
 from utils.git_utils import (
     get_flat_file_tree,
-    get_file_stats,
     get_most_frequent_author,
     get_top_author_by_stat,
 )
@@ -21,11 +21,11 @@ class ColumnDataBuilder:
 
     def __init__(
         self,
-        git_instance: Git,
+        files_stats: Dict[str, List[FileCommitStats]],
         repo_instance: Repo,
         **kwargs: Unpack[ColumnBuilderKwargs],
     ):
-        self.git_instance = git_instance
+        self._files_stats = files_stats
         self.repo_instance = repo_instance
         self.flat_file_tree = get_flat_file_tree(self.repo_instance.head.commit.tree)
         self.pathname_length = kwargs.get("pathname_length", 2)
@@ -44,8 +44,7 @@ class ColumnDataBuilder:
     def add_commit_amount(self) -> Self:
         """Add commit amount column"""
         self._columns[CliTableColumn.COMMIT_AMOUNT.value] = [
-            str(len(get_file_stats(self.git_instance, name)))
-            for name in self.flat_file_tree
+            str(len(self._files_stats.get(name, []))) for name in self.flat_file_tree
         ]
 
         return self
@@ -55,7 +54,7 @@ class ColumnDataBuilder:
         """Add author column"""
         self._columns[CliTableColumn.MOST_FREQUENT_AUTHOR.value] = list(
             map(
-                lambda x: get_most_frequent_author(self.git_instance, x),
+                lambda x: get_most_frequent_author(x, self._files_stats),
                 self.flat_file_tree,
             )
         )
@@ -68,8 +67,8 @@ class ColumnDataBuilder:
         self._columns[CliTableColumn.MOST_ADDED_AUTHOR.value] = list(
             map(
                 lambda file_name: get_top_author_by_stat(
-                    self.git_instance,
                     file_name,
+                    self._files_stats,
                     lambda x: int(x.added_lines),
                 ),
                 self.flat_file_tree,
@@ -84,8 +83,8 @@ class ColumnDataBuilder:
         self._columns[CliTableColumn.MOST_DELETED_AUTHOR.value] = list(
             map(
                 lambda file_name: get_top_author_by_stat(
-                    self.git_instance,
                     file_name,
+                    self._files_stats,
                     lambda x: int(x.removed_lines),
                 ),
                 self.flat_file_tree,
@@ -105,9 +104,7 @@ class ColumnDataBuilder:
         self._columns[CliTableColumn.DELETED_ADDED_RATIO.value] = list(
             map(
                 lambda file_name: shorten_ratio(
-                    calculate_deleted_added_ratio(
-                        get_file_stats(self.git_instance, file_name)
-                    )
+                    calculate_deleted_added_ratio(self._files_stats.get(file_name, []))
                 ),
                 self.flat_file_tree,
             )
@@ -121,7 +118,7 @@ class ColumnDataBuilder:
         self._columns[CliTableColumn.LINE_COUNT.value] = list(
             map(
                 lambda file_name: str(
-                    calculate_line_count(get_file_stats(self.git_instance, file_name))
+                    calculate_line_count(self._files_stats.get(file_name, []))
                 ),
                 self.flat_file_tree,
             )
@@ -138,7 +135,6 @@ class ColumnDataBuilder:
             return (
                 not method_name.startswith("_")
                 and method_name != "building_methods"
-                and method_name != "git_instance"
                 and hasattr(getattr(self, method_name), "builder_column_name")
                 and getattr(self, method_name).builder_column_name
             )
