@@ -1,12 +1,99 @@
 """Git utils"""
 
-from typing import List, Callable
-from functools import cache
+import asyncio
+from typing import List, Callable, Dict
 from statistics import mode
 from git import Tree, Git
 from app_types.dataclasses import FileCommitStats
 from utils.numbers import is_number
 from utils.text import trim_side_quotes
+
+
+CONCURRENT_CONSUMER_AMOUNT = 4
+
+
+# pylint: disable = too-few-public-methods
+class _QueueEnd:
+    """
+    Class to mark the end of queue
+    This class should not be used directly
+    """
+
+
+async def _file_name_producer(queue: asyncio.Queue, file_names: List[str]) -> None:
+    """
+    Producer for collecting files git stats
+    This function should not be called directly
+    :param queue: asyncion.Queue
+    :param file_names: List of all file names
+    :return: Explicitly return None
+    """
+    for name in file_names:
+        await queue.put(name)
+
+    for _ in range(0, CONCURRENT_CONSUMER_AMOUNT):
+        await queue.put(_QueueEnd())
+
+    return None
+
+
+async def _file_name_consumer(
+    queue: asyncio.Queue, git_instance: Git
+) -> Dict[str, List[FileCommitStats]]:
+    """
+    Consumer function for collecting files git stats
+    This function should not be called directly
+    :param queue: asyncio.Queue
+    :param git_instance: Git instance
+    :return: Returns dictionary, with portion of files and corresponding list of file stats
+    """
+    result_data: Dict[str, List[FileCommitStats]] = {}
+    while True:
+        file_name: str | _QueueEnd = await queue.get()
+        if isinstance(file_name, _QueueEnd):
+            queue.task_done()
+            break
+
+        res = await asyncio.to_thread(lambda: get_file_stats(git_instance, file_name))
+        result_data[file_name] = res
+        queue.task_done()
+    return result_data
+
+
+async def _collect_stats_all_files(git_instance: Git, file_names: List[str]):
+    """
+    Collect git stats for each file
+    This function should not be called directly
+    :param git_instance: Instance of Git
+    :oaram file_names: List of all file names
+    """
+    queue = asyncio.Queue(maxsize=32)
+    task_result = await asyncio.gather(
+        _file_name_producer(queue, file_names),
+        *(
+            _file_name_consumer(queue, git_instance)
+            for _ in range(0, CONCURRENT_CONSUMER_AMOUNT)
+        ),
+        return_exceptions=True,
+    )
+    map_result: Dict[str, List[FileCommitStats]] = {}
+    for entry in task_result:
+        if entry is not None and not isinstance(entry, BaseException):
+            map_result |= entry
+
+    return map_result
+
+
+def get_all_files_stats(
+    repo_path: str, file_names: List[str]
+) -> Dict[str, List[FileCommitStats]]:
+    """
+    Return git stats for all specified files
+    :param repo_path: Path to git repo
+    :param file_names: All specified file names for which we need to collect stats
+    :return: List of git stats for each file
+    """
+    return asyncio.run(_collect_stats_all_files(Git(repo_path), file_names))
 
 
 def get_flat_file_tree(tree: Tree) -> List[str]:
@@ -32,10 +119,9 @@ def is_stat_trackable(split_stat: List[str]) -> bool:
     )
 
 
-@cache
 def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     """
-    Collect number stats about file from git.
+    Collect number stats about single file from git.
     :param git_instance: Instance of git.Git
     :param filepath: File path.
     :return: Return list of stats.
@@ -62,19 +148,23 @@ def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
     return result
 
 
-def get_most_frequent_author(git_instance: Git, file_name: str) -> str:
+def get_most_frequent_author(
+    file_name: str, files_stats: Dict[str, List[FileCommitStats]]
+) -> str:
     """
     Calculate the author of the most code in file
     :param git_instance: Instance of git.Git
     :param file_name: Name of file
     :return: Author name
     """
-    authors = [info.author for info in get_file_stats(git_instance, file_name)]
+    authors = [info.author for info in files_stats.get(file_name, [])]
     return trim_side_quotes(mode(authors))
 
 
 def get_top_author_by_stat(
-    git_instance: Git, file_name: str, func: Callable[[FileCommitStats], int]
+    file_name: str,
+    files_stats: Dict[str, List[FileCommitStats]],
+    func: Callable[[FileCommitStats], int],
 ) -> str:
     """
     Functions calculates top author,
@@ -85,7 +175,7 @@ def get_top_author_by_stat(
     :return: Top author and summed up stat
     """
     authors_data = {}
-    for stat in get_file_stats(git_instance, file_name):
+    for stat in files_stats.get(file_name, []):
         authors_data[stat.author] = authors_data.get(stat.author, 0) + func(stat)
 
     top_author = max(authors_data, key=authors_data.get)
