@@ -7,17 +7,18 @@ class CliTable(Protocol):
     """Protocol class for common table interface."""
 
     def __init__(self):
-        self._field_names: List[str] = []
+        """Constructor"""
 
-    def add_row(self, row: List[Any], *, divider: bool = False):
+    def add_row(self, row: Any, *, divider: bool = False):
         """Add row to table."""
+        return None
 
     @property
-    def field_names(self):
+    def field_names(self) -> List[str]:
         """Property for field_names"""
-        return self._field_names
+        return []
 
     @field_names.setter
-    def field_names(self, new_field_names: List[str]):
+    def field_names(self, val: Any):
         """Property setter for field_names"""
-        self._field_names = new_field_names
+        return None

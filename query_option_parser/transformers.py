@@ -7,6 +7,7 @@ from sqlalchemy import and_, or_, asc, desc, UnaryExpression
 from enums.columns import SortingDirection, CliTableColumn
 from orm.git_stat import GitStat
 from query_option_parser.nodes import SortRuleNode, ShowNode
+from utils.git_utils import get_top_author_by_stat
 
 
 def map_sign_to_filter(compare: ast.Compare):
@@ -32,6 +33,9 @@ def map_sign_to_filter(compare: ast.Compare):
 
 def map_bool_operation_to_orm_operation(bool_operation: ast.BoolOp):
     """Map Python BoolOp operation, to ORM logical operation"""
+    if not hasattr(bool_operation, "op"):
+        return or_
+
     match bool_operation.op:
         case ast.And():
             return and_
@@ -39,9 +43,16 @@ def map_bool_operation_to_orm_operation(bool_operation: ast.BoolOp):
             return or_
 
 
-def transform_ast_bool_op_to_orm_filters(test_statement: ast.BoolOp):
+def transform_ast_bool_op_to_orm_filters(test_statement: ast.BoolOp | ast.Compare):
     """Transform Python AST bool operation to ORM filters"""
+    if isinstance(test_statement, ast.Compare):
+        return map_sign_to_filter(test_statement)
+
     logical_operator = map_bool_operation_to_orm_operation(test_statement)
+    if logical_operator is None:
+        print("Filter bool operator is not supported")
+        exit()
+
     binary_conditions = []
     for single_value in test_statement.values:
         if isinstance(single_value, ast.Compare):

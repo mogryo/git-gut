@@ -14,7 +14,6 @@ from defaults.command import (
     DEFAULT_COLUMNS,
     DEFAULT_SORT,
     DEFAULT_COLORS,
-    DEFAULT_FILTERS,
 )
 
 
@@ -60,10 +59,10 @@ def filter_option(func) -> Command:
     """Filters option decorator"""
     return option(
         "--filters",
-        default=DEFAULT_FILTERS,
+        default=None,
         help=f"""
             Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
-            Available sings: {AVAILABLE_SIGNS_TEXT}\n
+            Available signs: {AVAILABLE_SIGNS_TEXT}\n
             Example of input: --filters="linecount>50 and daratio>0.5"
         """,
     )(func)
@@ -78,7 +77,7 @@ def query_option(func) -> Command:
             Provide query\n
             Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
             Sort variants: {AVAILABLE_SORT_TEXT}\n
-            Available sings: {AVAILABLE_SIGNS_TEXT}\n
+            Available signs: {AVAILABLE_SIGNS_TEXT}\n
             Example of input: SHOW linecount, daratio FROM ./ WHERE linecount > 100 and daratio < 1\n
             ORDER BY daratio ASC and linecount DESC\n
             Note! When query option provided, options: columns, filters, sort - are ignored
