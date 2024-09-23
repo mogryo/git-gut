@@ -15,6 +15,10 @@ def calculate_deleted_added_ratio(commit_stats: List[FileCommitStats]) -> float:
     added_deleted_ratios = [
         info.removed_lines / parse_zero(info.added_lines) for info in commit_stats
     ]
+
+    if len(added_deleted_ratios) == 0:
+        return 0
+
     return mean(added_deleted_ratios)
 
 

@@ -29,5 +29,3 @@ DEFAULT_COLORS = ";".join(
         f"/400,,{CliTableColumnColor.RED.name};",
     ]
 )
-
-DEFAULT_FILTERS = "linecount > 130"

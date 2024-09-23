@@ -67,7 +67,7 @@ def split_sort_rule_string(
 
 def parse_where_statement(where_statement: Optional[str] = "") -> WhereNode:
     """Parse statement with Python ast module"""
-    if where_statement.strip() == "":
+    if where_statement is None or where_statement.strip() == "":
         return WhereNode(None)
 
     parsed_statement = ast.parse(f"""if {where_statement}: \n\tpass""")

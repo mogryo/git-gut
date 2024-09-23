@@ -1,12 +1,14 @@
 """Main file of application"""
 
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 import click
-from git import Repo, Git
+from git import Repo, Git, exc
 from prettytable import PrettyTable
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine, Result
+import os
 
+from app_types.dataclasses import FileCommitStats
 from builders.color_pipeline_builder import ColorPipelineBuilder
 from builders.column_data_builder import ColumnDataBuilder
 from builders.table_data_builder import TableDataBuilder
@@ -28,7 +30,12 @@ from utils.command_option_parser import (
     parse_option_color,
     parse_option_query,
 )
-from utils.git_utils import get_non_text_files, get_all_files_stats, get_flat_file_tree
+from utils.git_utils import (
+    get_file_stats,
+    get_non_text_files,
+    get_all_files_stats,
+    get_flat_file_tree,
+)
 from utils.database import create_db_engine, create_tables
 from repositories.git_stat_repo import (
     prepare_all_rows,
@@ -42,18 +49,40 @@ from repositories.git_stat_repo import (
 def process_query(
     query: Optional[str],
     engine: Engine,
-    repo_path: str,
 ) -> Tuple[List[CliTableColumn], Result]:
     """Process query option provided"""
+    all_files_stats: Dict[str, List[FileCommitStats]]
+    root_node = parse_option_query(query)
+
+    if root_node.from_node is None:
+        print("FROM path was not provided")
+        exit()
+    if root_node.show_node is None:
+        print("SHOW columns are not valid")
+        exit()
+
+    repo: Repo
+    try:
+        repo = Repo(root_node.from_node.path, search_parent_directories=True)
+    except exc.InvalidGitRepositoryError:
+        print("Provided FROM path is not GIT repository")
+        exit()
+
+    flat_file_tree = get_flat_file_tree(
+        repo.head.commit.tree,
+        root_node.from_node.path,
+    )
     all_files_stats = get_all_files_stats(
-        repo_path, get_flat_file_tree(Repo(repo_path).head.commit.tree)
+        root_node.from_node.path,
+        flat_file_tree,
+        repo.git,
     )
 
-    root_node = parse_option_query(query)
     table_data_builder = TableDataBuilder(
         ColumnDataBuilder(
             all_files_stats,
-            Repo(root_node.from_node.path),
+            flat_file_tree,
+            repo,
             pathname_length=2,
         )
     )
@@ -74,17 +103,31 @@ def process_separate_options(
     sort: Optional[str],
     filters: Optional[str],
     engine: Engine,
-    repo_path: str,
+    file_path: str,
 ) -> Tuple[List[CliTableColumn], Result]:
     """Process separate options: columns, sort, filters"""
+    repo: Repo
+    try:
+        repo = Repo(file_path, search_parent_directories=True)
+    except exc.InvalidGitRepositoryError:
+        print("Provided FROM path is not GIT repository")
+        exit()
+
+    flat_file_tree = get_flat_file_tree(
+        repo.head.commit.tree,
+        file_path,
+    )
+
     all_files_stats = get_all_files_stats(
-        repo_path, get_flat_file_tree(Repo(repo_path).head.commit.tree)
+        file_path,
+        flat_file_tree,
+        repo.git,
     )
 
     table_data_builder = TableDataBuilder(
-        ColumnDataBuilder(all_files_stats, Repo(repo_path), pathname_length=2)
+        ColumnDataBuilder(all_files_stats, flat_file_tree, repo, pathname_length=2)
     )
-    column_names = parse_option_columns(columns)
+    column_names = parse_option_columns(columns if columns is not None else "")
     data_rows = table_data_builder.build_data(column_names).rows
 
     with Session(engine) as session:
@@ -144,7 +187,7 @@ def git_hot(
     create_tables(engine)
 
     column_names, result_rows = (
-        process_query(query, engine, repo_path)
+        process_query(query, engine)
         if query is not None and query.strip() != ""
         else process_separate_options(columns, sort, filters, engine, repo_path)
     )

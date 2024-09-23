@@ -1,7 +1,8 @@
 """Git utils"""
 
 import asyncio
-from typing import List, Callable, Dict
+import os
+from typing import List, Callable, Dict, cast, Optional
 from statistics import mode
 from git import Tree, Git
 from app_types.dataclasses import FileCommitStats
@@ -85,7 +86,9 @@ async def _collect_stats_all_files(git_instance: Git, file_names: List[str]):
 
 
 def get_all_files_stats(
-    repo_path: str, file_names: List[str]
+    repo_path: str,
+    file_names: List[str],
+    git: Git,
 ) -> Dict[str, List[FileCommitStats]]:
     """
     Return git stats for all specified files
@@ -93,19 +96,68 @@ def get_all_files_stats(
     :param file_names: All specified file names for which we need to collect stats
     :return: List of git stats for each file
     """
-    return asyncio.run(_collect_stats_all_files(Git(repo_path), file_names))
+    return asyncio.run(_collect_stats_all_files(git, file_names))
 
 
-def get_flat_file_tree(tree: Tree) -> List[str]:
+def get_flat_file_tree(tree: Tree, specific_path: Optional[str] = None) -> List[str]:
     """
     Iterate through the whole git file tree.
     :param tree: Instance of git.Tree
     :return: Flat representation of file tree.
     """
-    generated_list = []
+    if specific_path is not None and os.path.isdir(specific_path):
+        return get_sub_directory_file_list(tree, specific_path)
+
+    if specific_path is not None and os.path.isfile(specific_path):
+        return get_specific_file_as_list(tree, specific_path)
+
+    return get_tree_file_list(tree)
+
+
+def get_specific_file_as_list(tree: Tree, specific_path: str) -> List[str]:
+    generated_list: List[str] = []
+    abs_specific_path = os.path.abspath(specific_path)
+
+    for entry in tree:
+        if entry.type == "blob" and entry.abspath == abs_specific_path:
+            return [specific_path]
+        elif entry.type == "tree":
+            generated_list.extend(
+                get_specific_file_as_list(cast(Tree, entry), specific_path)
+            )
+
+    return generated_list
+
+
+def get_sub_directory_file_list(tree: Tree, specific_path: str) -> List[str]:
+    generated_list: List[str] = []
+    abs_specific_path = os.path.abspath(specific_path)
+
+    if tree.abspath == abs_specific_path:
+        return get_tree_file_list(tree)
+
+    for entry in tree:
+        if entry.abspath == abs_specific_path:
+            return get_tree_file_list(cast(Tree, entry))
+        elif entry.type == "tree":
+            generated_list.extend(
+                get_sub_directory_file_list(cast(Tree, entry), specific_path)
+            )
+
+    return generated_list
+
+
+def get_tree_file_list(tree: Tree) -> List[str]:
+    """
+    Iterate through the whole git file tree.
+    :param tree: Instance of git.Tree
+    :return: Flat representation of file tree.
+    """
+    generated_list: List[str] = []
+
     for entry in tree:
         if entry.type == "blob":
-            generated_list.append(entry.path)
+            generated_list.append(cast(str, entry.path))
         if entry.type == "tree":
             generated_list.extend(get_flat_file_tree(entry))
 
