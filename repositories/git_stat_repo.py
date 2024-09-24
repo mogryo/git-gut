@@ -63,9 +63,9 @@ def prepare_order_by(
     return select_statement.order_by(*order_by_list)
 
 
-def prepare_where(where_node: WhereNode, select_statement: Select) -> Select:
+def prepare_where(where_node: WhereNode | None, select_statement: Select) -> Select:
     """Add filtering to select statement"""
-    if where_node.condition_node is not None:
+    if where_node is not None and where_node.condition_node is not None:
         return select_statement.where(
             transform_ast_bool_op_to_orm_filters(where_node.condition_node)
         )
@@ -74,10 +74,10 @@ def prepare_where(where_node: WhereNode, select_statement: Select) -> Select:
 
 
 def prepare_order_by_from_node(
-    orderby_node: OrderNode, select_statement: Select
+    orderby_node: OrderNode | None, select_statement: Select
 ) -> Select:
     """Add sorting to select statement"""
-    if len(orderby_node.sort_rule_nodes) > 0:
+    if orderby_node is not None and len(orderby_node.sort_rule_nodes) > 0:
         return select_statement.order_by(
             *transform_sort_nodes_to_order_by(orderby_node.sort_rule_nodes)
         )
