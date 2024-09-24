@@ -1,8 +1,9 @@
 """Transform nodes into sqlalchemy objects, queries, statements"""
 
 import ast
+import sys
 from typing import List, cast
-from sqlalchemy import and_, or_, asc, desc, UnaryExpression
+from sqlalchemy import ColumnExpressionArgument, and_, or_, asc, desc, UnaryExpression
 
 from enums.columns import SortingDirection, CliTableColumn
 from orm.git_stat import GitStat
@@ -10,7 +11,7 @@ from query_option_parser.nodes import SortRuleNode, ShowNode
 from utils.git_utils import get_top_author_by_stat
 
 
-def map_sign_to_filter(compare: ast.Compare):
+def map_sign_to_filter(compare: ast.Compare) -> ColumnExpressionArgument[bool]:
     """Map condition to filter, depending on sign"""
     left = cast(ast.Name, compare.left)
     orm_field = getattr(GitStat, left.id)
@@ -29,6 +30,10 @@ def map_sign_to_filter(compare: ast.Compare):
             return orm_field == literal
         case ast.NotEq():
             return orm_field != literal
+        case _:
+            # Todo: Implement proper error handling
+            print(f"Unsupported compare sign has been provided: {compare.ops[0]}")
+            sys.exit()
 
 
 def map_bool_operation_to_orm_operation(bool_operation: ast.BoolOp):
@@ -43,7 +48,7 @@ def map_bool_operation_to_orm_operation(bool_operation: ast.BoolOp):
             return or_
 
 
-def transform_ast_bool_op_to_orm_filters(test_statement: ast.BoolOp | ast.Compare):
+def transform_ast_bool_op_to_orm_filters(test_statement: ast.BoolOp | ast.Compare) -> ColumnExpressionArgument[bool]:
     """Transform Python AST bool operation to ORM filters"""
     if isinstance(test_statement, ast.Compare):
         return map_sign_to_filter(test_statement)

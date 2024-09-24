@@ -7,6 +7,7 @@ from prettytable import PrettyTable
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine, Result
 import os
+import sys
 
 from app_types.dataclasses import FileCommitStats
 from builders.color_pipeline_builder import ColorPipelineBuilder
@@ -54,19 +55,21 @@ def process_query(
     all_files_stats: Dict[str, List[FileCommitStats]]
     root_node = parse_option_query(query)
 
+    # Todo: Implement proper error handling
     if root_node.from_node is None:
         print("FROM path was not provided")
-        exit()
+        sys.exit()
     if root_node.show_node is None:
         print("SHOW columns are not valid")
-        exit()
+        sys.exit()
 
+    # Todo: Implement proper error handling
     repo: Repo
     try:
         repo = Repo(root_node.from_node.path, search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
         print("Provided FROM path is not GIT repository")
-        exit()
+        sys.exit()
 
     flat_file_tree = get_flat_file_tree(
         repo.head.commit.tree,
@@ -111,7 +114,7 @@ def process_separate_options(
         repo = Repo(file_path, search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
         print("Provided FROM path is not GIT repository")
-        exit()
+        sys.exit()
 
     flat_file_tree = get_flat_file_tree(
         repo.head.commit.tree,
@@ -146,7 +149,7 @@ def process_separate_options(
     return column_names, sorted_rows
 
 
-def process_terminating_options(repo_path: str, non_text: bool) -> bool:
+def process_terminating_options(repo_path: str | None, non_text: bool) -> bool:
     """Process options, after which all other options are ignored"""
     if non_text:
         non_text_files = get_non_text_files(Git(repo_path))
@@ -161,7 +164,7 @@ def process_terminating_options(repo_path: str, non_text: bool) -> bool:
 
 
 @click.command()
-@click.argument("repo_path")
+@click.argument("file_paths", nargs=-1)
 @columns_option
 @sort_option
 @colors_option
@@ -170,7 +173,7 @@ def process_terminating_options(repo_path: str, non_text: bool) -> bool:
 @non_text_files_option
 # pylint: disable = too-many-arguments
 def git_hot(
-    repo_path: str,
+    file_paths: Tuple[str],
     columns: Optional[str],
     sort: Optional[str],
     colors: Optional[str],
@@ -179,7 +182,15 @@ def git_hot(
     query: Optional[str],
 ):
     """Command entry point"""
-    is_terminated = process_terminating_options(repo_path, nontext)
+    file_path = file_paths[0] if len(file_paths) > 0 else None
+    if query is None and file_path is None:
+        print("Provide either --query option or repo_path argument")
+        sys.exit()
+    if nontext == True and file_path is None:
+        print("Nontext option has been provided, please provide valid repo path argument")
+        sys.exit()
+      
+    is_terminated = process_terminating_options(file_path, nontext)
     if is_terminated:
         return
 
@@ -189,7 +200,7 @@ def git_hot(
     column_names, result_rows = (
         process_query(query, engine)
         if query is not None and query.strip() != ""
-        else process_separate_options(columns, sort, filters, engine, repo_path)
+        else process_separate_options(columns, sort, filters, engine, repo_path[0])
     )
 
     painted_rows = (
