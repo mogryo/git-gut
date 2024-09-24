@@ -1,13 +1,12 @@
 """Main file of application"""
 
+import sys
 from typing import Optional, Tuple, List, Dict
 import click
 from git import Repo, Git, exc
 from prettytable import PrettyTable
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine, Result
-import os
-import sys
 
 from app_types.dataclasses import FileCommitStats
 from builders.color_pipeline_builder import ColorPipelineBuilder
@@ -32,7 +31,6 @@ from utils.command_option_parser import (
     parse_option_query,
 )
 from utils.git_utils import (
-    get_file_stats,
     get_non_text_files,
     get_all_files_stats,
     get_flat_file_tree,
@@ -55,7 +53,6 @@ def process_query(
     all_files_stats: Dict[str, List[FileCommitStats]]
     root_node = parse_option_query(query)
 
-    # Todo: Implement proper error handling
     if root_node.from_node is None:
         print("FROM path was not provided")
         sys.exit()
@@ -63,7 +60,6 @@ def process_query(
         print("SHOW columns are not valid")
         sys.exit()
 
-    # Todo: Implement proper error handling
     repo: Repo
     try:
         repo = Repo(root_node.from_node.path, search_parent_directories=True)
@@ -76,7 +72,6 @@ def process_query(
         root_node.from_node.path,
     )
     all_files_stats = get_all_files_stats(
-        root_node.from_node.path,
         flat_file_tree,
         repo.git,
     )
@@ -122,7 +117,6 @@ def process_separate_options(
     )
 
     all_files_stats = get_all_files_stats(
-        file_path,
         flat_file_tree,
         repo.git,
     )
@@ -182,14 +176,8 @@ def git_hot(
     query: Optional[str],
 ):
     """Command entry point"""
-    file_path = file_paths[0] if len(file_paths) > 0 else None
-    if query is None and file_path is None:
-        print("Provide either --query option or repo_path argument")
-        sys.exit()
-    if nontext == True and file_path is None:
-        print("Nontext option has been provided, please provide valid repo path argument")
-        sys.exit()
-      
+    file_path: str = file_paths[0] if len(file_paths) > 0 else "./"
+
     is_terminated = process_terminating_options(file_path, nontext)
     if is_terminated:
         return
@@ -200,7 +188,7 @@ def git_hot(
     column_names, result_rows = (
         process_query(query, engine)
         if query is not None and query.strip() != ""
-        else process_separate_options(columns, sort, filters, engine, repo_path[0])
+        else process_separate_options(columns, sort, filters, engine, file_path)
     )
 
     painted_rows = (

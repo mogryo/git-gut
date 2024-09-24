@@ -8,7 +8,6 @@ from app_types.utils import ColumnBuilderKwargs
 from decorators.column_building_method import column_building_method
 from enums.columns import CliTableColumn
 from utils.git_utils import (
-    get_flat_file_tree,
     get_most_frequent_author,
     get_top_author_by_stat,
 )
