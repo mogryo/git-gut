@@ -46,7 +46,8 @@ class TablePainterBuilder:
     ) -> Self:
         """Set color for columns from dictionary"""
         for column_name in colors.keys():
-            self.set_number_column_color(column_name, colors[column_name])
+            if column_name in self._column_names:
+                self.set_number_column_color(column_name, colors[column_name])
 
         return self
 

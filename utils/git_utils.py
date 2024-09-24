@@ -86,7 +86,6 @@ async def _collect_stats_all_files(git_instance: Git, file_names: List[str]):
 
 
 def get_all_files_stats(
-    repo_path: str,
     file_names: List[str],
     git: Git,
 ) -> Dict[str, List[FileCommitStats]]:
@@ -103,6 +102,7 @@ def get_flat_file_tree(tree: Tree, specific_path: Optional[str] = None) -> List[
     """
     Iterate through the whole git file tree.
     :param tree: Instance of git.Tree
+    :specific_path: Optional parameter to specify sub directory, specific file, omit if whole repo
     :return: Flat representation of file tree.
     """
     if specific_path is not None and os.path.isdir(specific_path):
@@ -115,13 +115,19 @@ def get_flat_file_tree(tree: Tree, specific_path: Optional[str] = None) -> List[
 
 
 def get_specific_file_as_list(tree: Tree, specific_path: str) -> List[str]:
+    """
+    Make sure specified file path exists in git tree and return in a list
+    :param tree: Instance of git.Tree
+    :specific_path: File path
+    :return: Single file name inside of list
+    """
     generated_list: List[str] = []
     abs_specific_path = os.path.abspath(specific_path)
 
     for entry in tree:
         if entry.type == "blob" and entry.abspath == abs_specific_path:
             return [specific_path]
-        elif entry.type == "tree":
+        if entry.type == "tree":
             generated_list.extend(
                 get_specific_file_as_list(cast(Tree, entry), specific_path)
             )
@@ -130,6 +136,12 @@ def get_specific_file_as_list(tree: Tree, specific_path: str) -> List[str]:
 
 
 def get_sub_directory_file_list(tree: Tree, specific_path: str) -> List[str]:
+    """
+    Return sub directory of repo as flat structure
+    :param tree: Instance of git.Tree
+    :specific_path: Sub directory to return as flat file tree
+    :return: Flat representation of file tree of sub directory in repo
+    """
     generated_list: List[str] = []
     abs_specific_path = os.path.abspath(specific_path)
 
@@ -139,7 +151,7 @@ def get_sub_directory_file_list(tree: Tree, specific_path: str) -> List[str]:
     for entry in tree:
         if entry.abspath == abs_specific_path:
             return get_tree_file_list(cast(Tree, entry))
-        elif entry.type == "tree":
+        if entry.type == "tree":
             generated_list.extend(
                 get_sub_directory_file_list(cast(Tree, entry), specific_path)
             )
