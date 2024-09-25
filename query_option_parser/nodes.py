@@ -54,6 +54,21 @@ class FromNode:
 
 
 @dataclass
+class SinceNode:
+    """Since statement"""
+
+    date: str
+
+
+@dataclass
+class IntervalNode:
+    """Interval statement"""
+
+    since: Optional[str]
+    until: Optional[str]
+
+
+@dataclass
 class StatementNode:
     """Root of show statements"""
 
@@ -61,3 +76,4 @@ class StatementNode:
     where_node: Optional[WhereNode]
     order_node: Optional[OrderNode]
     from_node: Optional[FromNode]
+    interval_node: Optional[IntervalNode]

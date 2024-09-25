@@ -30,3 +30,11 @@ class SortingRule:
 
     column_name: CliTableColumn
     sort_direction: SortingDirection
+
+
+@dataclass
+class GitLogOptions:
+    """Dataclass for storing git log options"""
+
+    since: Optional[str]
+    until: Optional[str]

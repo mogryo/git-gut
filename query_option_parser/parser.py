@@ -1,10 +1,12 @@
 """Parser functions"""
 
 import ast
+import sys
 from typing import List, Optional, Tuple, cast
 
 from enums.columns import SortingDirection, CliTableColumn
 from query_option_parser.nodes import (
+    IntervalNode,
     ShowNode,
     OrderNode,
     SortRuleNode,
@@ -99,7 +101,36 @@ def parse_order_statement(order_statement: Optional[str] = "") -> OrderNode:
 
 def parse_from_statement(from_statement: Optional[str] = "") -> FromNode:
     """Parse from statement"""
-    return FromNode(from_statement)
+    return FromNode(from_statement if from_statement is not None else "")
+
+
+def parse_interval_statement(interval_statement: Optional[str] = "") -> IntervalNode:
+    """Parse interval statement"""
+    split_words = (
+        [word.upper() for word in interval_statement.split()]
+        if interval_statement is not None
+        else []
+    )
+
+    if not (len(split_words) == 2 or len(split_words) == 4):
+        print("Please specify correct INTERVAL")
+        sys.exit()
+
+    since: str | None = None
+    until: str | None = None
+    if len(split_words) > 1:
+        if split_words[0] == "SINCE" or split_words[0] == "AFTER":
+            since = split_words[1]
+        elif split_words[0] == "UNTIL" or split_words[0] == "BEFORE":
+            until = split_words[1]
+
+    if len(split_words) == 4:
+        if split_words[2] == "SINCE" or split_words[2] == "AFTER":
+            since = split_words[3]
+        elif split_words[2] == "UNTIL" or split_words[2] == "BEFORE":
+            until = split_words[3]
+
+    return IntervalNode(since, until)
 
 
 TOP_LEVEL_STATEMENT_PARSERS = {
@@ -107,6 +138,7 @@ TOP_LEVEL_STATEMENT_PARSERS = {
     "FROM": parse_from_statement,
     "WHERE": parse_where_statement,
     "ORDERBY": parse_order_statement,
+    "INTERVAL": parse_interval_statement,
 }
 
 ROOT_NODE_KEYS = {
@@ -114,4 +146,5 @@ ROOT_NODE_KEYS = {
     "FROM": "from_node",
     "WHERE": "where_node",
     "ORDERBY": "order_node",
+    "INTERVAL": "interval_node",
 }

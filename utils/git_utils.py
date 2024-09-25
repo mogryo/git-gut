@@ -5,7 +5,7 @@ import os
 from typing import List, Callable, Dict, cast, Optional
 from statistics import mode
 from git import Tree, Git
-from app_types.dataclasses import FileCommitStats
+from app_types.dataclasses import FileCommitStats, GitLogOptions
 from utils.numbers import is_number
 from utils.text import trim_side_quotes
 
@@ -39,7 +39,9 @@ async def _file_name_producer(queue: asyncio.Queue, file_names: List[str]) -> No
 
 
 async def _file_name_consumer(
-    queue: asyncio.Queue, git_instance: Git
+    queue: asyncio.Queue,
+    git_instance: Git,
+    log_options: GitLogOptions,
 ) -> Dict[str, List[FileCommitStats]]:
     """
     Consumer function for collecting files git stats
@@ -55,13 +57,21 @@ async def _file_name_consumer(
             queue.task_done()
             break
 
-        res = await asyncio.to_thread(lambda: get_file_stats(git_instance, file_name))
+        res = await asyncio.to_thread(
+            lambda: (
+                get_file_stats(git_instance, file_name, log_options)
+                if isinstance(file_name, str)
+                else []
+            )
+        )
         result_data[file_name] = res
         queue.task_done()
     return result_data
 
 
-async def _collect_stats_all_files(git_instance: Git, file_names: List[str]):
+async def _collect_stats_all_files(
+    git_instance: Git, file_names: List[str], log_options: GitLogOptions
+):
     """
     Collect git stats for each file
     This function should not be called directly
@@ -72,7 +82,7 @@ async def _collect_stats_all_files(git_instance: Git, file_names: List[str]):
     task_result = await asyncio.gather(
         _file_name_producer(queue, file_names),
         *(
-            _file_name_consumer(queue, git_instance)
+            _file_name_consumer(queue, git_instance, log_options)
             for _ in range(0, CONCURRENT_CONSUMER_AMOUNT)
         ),
         return_exceptions=True,
@@ -88,6 +98,7 @@ async def _collect_stats_all_files(git_instance: Git, file_names: List[str]):
 def get_all_files_stats(
     file_names: List[str],
     git: Git,
+    log_options: GitLogOptions,
 ) -> Dict[str, List[FileCommitStats]]:
     """
     Return git stats for all specified files
@@ -95,7 +106,7 @@ def get_all_files_stats(
     :param file_names: All specified file names for which we need to collect stats
     :return: List of git stats for each file
     """
-    return asyncio.run(_collect_stats_all_files(git, file_names))
+    return asyncio.run(_collect_stats_all_files(git, file_names, log_options))
 
 
 def get_flat_file_tree(tree: Tree, specific_path: Optional[str] = None) -> List[str]:
@@ -183,15 +194,23 @@ def is_stat_trackable(split_stat: List[str]) -> bool:
     )
 
 
-def get_file_stats(git_instance: Git, filepath: str) -> List[FileCommitStats]:
+def get_file_stats(
+    git_instance: Git, filepath: str, log_options: GitLogOptions
+) -> List[FileCommitStats]:
     """
     Collect number stats about single file from git.
     :param git_instance: Instance of git.Git
     :param filepath: File path.
     :return: Return list of stats.
     """
+    options = []
+    if log_options.since is not None:
+        options.append(f'--since="{log_options.since}"')
+    if log_options.until is not None:
+        options.append(f'--until="{log_options.until}"')
+
     raw_result: str = git_instance.log(
-        "--follow", "--numstat", '--format="%an"', "--", filepath
+        "--follow", "--numstat", '--format="%an"', *options, "--", filepath
     )
     separate_lines = list(filter(lambda x: x != "", raw_result.splitlines()))
     commit_list = list(zip(separate_lines[::2], separate_lines[1::2]))
@@ -222,7 +241,7 @@ def get_most_frequent_author(
     :return: Author name
     """
     authors = [info.author for info in files_stats.get(file_name, [])]
-    return trim_side_quotes(mode(authors))
+    return trim_side_quotes(mode(authors)) if len(authors) > 0 else "-"
 
 
 def get_top_author_by_stat(
