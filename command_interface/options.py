@@ -96,3 +96,29 @@ def non_text_files_option(func) -> Command:
             Note! When nontext option provided, all other options are ignored
         """,
     )(func)
+
+
+def until_option(func) -> Command:
+    """Until/before option"""
+    return option(
+        "--until",
+        "--before",
+        default=None,
+        help="""
+            Specify the date until which to gather git logs.
+            Format: YYYY-MM-DD
+        """,
+    )(func)
+
+
+def since_otion(func) -> Command:
+    """Since/after option"""
+    return option(
+        "--since",
+        "--after",
+        default=None,
+        help="""
+            Specify the date since which to gather git logs.
+            Format: YYYY-MM-DD
+        """,
+    )(func)

@@ -8,18 +8,20 @@ from prettytable import PrettyTable
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine, Result
 
-from app_types.dataclasses import FileCommitStats
+from app_types.dataclasses import FileCommitStats, GitLogOptions
 from builders.color_pipeline_builder import ColorPipelineBuilder
 from builders.column_data_builder import ColumnDataBuilder
 from builders.table_data_builder import TableDataBuilder
 from builders.table_painter_builder import TablePainterBuilder
 from command_interface.options import (
     columns_option,
+    since_otion,
     sort_option,
     colors_option,
     filter_option,
     query_option,
     non_text_files_option,
+    until_option,
 )
 from enums.columns import CliTableColumn
 from query_option_parser.parser import parse_where_statement
@@ -74,6 +76,18 @@ def process_query(
     all_files_stats = get_all_files_stats(
         flat_file_tree,
         repo.git,
+        GitLogOptions(
+            (
+                root_node.interval_node.since
+                if root_node.interval_node is not None
+                else None
+            ),
+            (
+                root_node.interval_node.until
+                if root_node.interval_node is not None
+                else None
+            ),
+        ),
     )
 
     table_data_builder = TableDataBuilder(
@@ -96,10 +110,13 @@ def process_query(
     return root_node.show_node.column_names, rows
 
 
+# pylint: disable = too-many-arguments
+# pylint: disable = too-many-locals
 def process_separate_options(
     columns: Optional[str],
     sort: Optional[str],
     filters: Optional[str],
+    log_options: GitLogOptions,
     engine: Engine,
     file_path: str,
 ) -> Tuple[List[CliTableColumn], Result]:
@@ -119,6 +136,7 @@ def process_separate_options(
     all_files_stats = get_all_files_stats(
         flat_file_tree,
         repo.git,
+        log_options,
     )
 
     table_data_builder = TableDataBuilder(
@@ -165,6 +183,8 @@ def process_terminating_options(repo_path: str | None, non_text: bool) -> bool:
 @filter_option
 @query_option
 @non_text_files_option
+@since_otion
+@until_option
 # pylint: disable = too-many-arguments
 def git_hot(
     file_paths: Tuple[str],
@@ -172,8 +192,10 @@ def git_hot(
     sort: Optional[str],
     colors: Optional[str],
     filters: Optional[str],
-    nontext: bool,
     query: Optional[str],
+    nontext: bool,
+    since: Optional[str],
+    until: Optional[str],
 ):
     """Command entry point"""
     file_path: str = file_paths[0] if len(file_paths) > 0 else "./"
@@ -184,11 +206,14 @@ def git_hot(
 
     engine = create_db_engine()
     create_tables(engine)
+    log_options = GitLogOptions(since, until)
 
     column_names, result_rows = (
         process_query(query, engine)
         if query is not None and query.strip() != ""
-        else process_separate_options(columns, sort, filters, engine, file_path)
+        else process_separate_options(
+            columns, sort, filters, log_options, engine, file_path
+        )
     )
 
     painted_rows = (

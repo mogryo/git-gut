@@ -86,7 +86,7 @@ def parse_option_query(statement: Optional[str] = "") -> StatementNode:
     """Parse whole statement"""
     active_statement: str | None = None
     accumulated_text: List[str] = []
-    root_node = StatementNode(None, None, None, None)
+    root_node = StatementNode(None, None, None, None, None)
 
     split_text = statement.split()
     for index, word in enumerate(split_text):
