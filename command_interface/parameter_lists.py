@@ -17,7 +17,7 @@ AVAILABLE_CELL_COLORS = list(
 )
 AVAILABLE_SORT = list(
     map(
-        lambda color: color.lower(),
+        lambda sort: sort.lower(),
         filter(lambda field: not field.startswith("_"), dir(SortingDirection)),
     )
 )
