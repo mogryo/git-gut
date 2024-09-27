@@ -13,7 +13,7 @@ COLUMN_OPTION_EXAMPLE = (
     f"{CliTableColumn.FILE_NAME.value},{CliTableColumn.LINE_COUNT.value}"
 )
 SORT_OPTION_EXAMPLE = (
-    f"{CliTableColumn.FILE_NAME.value}-asc," f"{CliTableColumn.LINE_COUNT.value}-desc"
+    f"{CliTableColumn.FILE_NAME.value} ASC" f"{CliTableColumn.LINE_COUNT.value} DESC"
 )
 COMMAND_OPTION_COLUMN_NAMES_TEXT = ", ".join(COMMAND_OPTION_COLUMN_NAMES)
 AVAILABLE_CELL_COLORS_TEXT = ", ".join(AVAILABLE_CELL_COLORS)

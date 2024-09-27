@@ -72,13 +72,14 @@ def parse_where_statement(where_statement: Optional[str] = "") -> WhereNode:
     if where_statement is None or where_statement.strip() == "":
         return WhereNode(None)
 
-    parsed_statement = ast.parse(f"""if {where_statement}: \n\tpass""")
+    corrected_where_statement = where_statement.replace(" AND ", " and ").replace(" OR ", " or ").replace(" NOT ", " not ")
+    parsed_statement = ast.parse(f"""if {corrected_where_statement }: \n\tpass""")
     return WhereNode(cast(ast.BoolOp, cast(ast.If, parsed_statement.body[0]).test))
 
 
-def parse_show_statement(show_statement: Optional[str] = "") -> ShowNode:
+def parse_show_statement(show_statement: Optional[str]) -> ShowNode:
     """Parse show statement"""
-    string_column_names = show_statement.replace(" ", "").split(",")
+    string_column_names = (show_statement or "").replace(" ", "").split(",")
 
     enum_column_names: List[CliTableColumn] = []
     for column_name in string_column_names:
@@ -88,10 +89,10 @@ def parse_show_statement(show_statement: Optional[str] = "") -> ShowNode:
     return ShowNode(enum_column_names)
 
 
-def parse_order_statement(order_statement: Optional[str] = "") -> OrderNode:
+def parse_order_statement(order_statement: Optional[str]) -> OrderNode:
     """Parse order(sort) statement"""
     sort_rule_nodes: List[SortRuleNode] = []
-    for sort_rule in order_statement.split(" and "):
+    for sort_rule in (order_statement or "").replace(" AND ", " and ").split(" and "):
         column_name, sort_direction = split_sort_rule_string(sort_rule)
         if is_valid_sort(column_name, sort_direction):
             sort_rule_nodes.append(SortRuleNode(column_name, sort_direction))

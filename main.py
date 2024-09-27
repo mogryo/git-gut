@@ -8,7 +8,7 @@ from prettytable import PrettyTable
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine, Result
 
-from app_types.dataclasses import FileCommitStats, GitLogOptions
+from app_types.dataclasses import FileCommitStats, GitLogOptions, SeparateOptionsAsQuery
 from builders.color_pipeline_builder import ColorPipelineBuilder
 from builders.column_data_builder import ColumnDataBuilder
 from builders.table_data_builder import TableDataBuilder
@@ -24,13 +24,11 @@ from command_interface.options import (
     until_option,
 )
 from enums.columns import CliTableColumn
-from query_option_parser.parser import parse_where_statement
 from utils.cli_table import draw_flat_tree_table
 from utils.command_option_parser import (
-    parse_option_columns,
-    parse_option_sort,
     parse_option_color,
     parse_option_query,
+    parse_separate_options_into_query,
 )
 from utils.git_utils import (
     get_non_text_files,
@@ -40,9 +38,6 @@ from utils.git_utils import (
 from utils.database import create_db_engine, create_tables
 from repositories.git_stat_repo import (
     prepare_all_rows,
-    prepare_select,
-    prepare_order_by,
-    prepare_where,
     prepare_query_statement,
 )
 
@@ -110,57 +105,6 @@ def process_query(
     return root_node.show_node.column_names, rows
 
 
-# pylint: disable = too-many-arguments
-# pylint: disable = too-many-locals
-def process_separate_options(
-    columns: Optional[str],
-    sort: Optional[str],
-    filters: Optional[str],
-    log_options: GitLogOptions,
-    engine: Engine,
-    file_path: str,
-) -> Tuple[List[CliTableColumn], Result]:
-    """Process separate options: columns, sort, filters"""
-    repo: Repo
-    try:
-        repo = Repo(file_path, search_parent_directories=True)
-    except exc.InvalidGitRepositoryError:
-        print("Provided FROM path is not GIT repository")
-        sys.exit()
-
-    flat_file_tree = get_flat_file_tree(
-        repo.head.commit.tree,
-        file_path,
-    )
-
-    all_files_stats = get_all_files_stats(
-        flat_file_tree,
-        repo.git,
-        log_options,
-    )
-
-    table_data_builder = TableDataBuilder(
-        ColumnDataBuilder(all_files_stats, flat_file_tree, repo, pathname_length=2)
-    )
-    column_names = parse_option_columns(columns if columns is not None else "")
-    data_rows = table_data_builder.build_data(column_names).rows
-
-    with Session(engine) as session:
-        git_stat_list = prepare_all_rows(column_names, data_rows)
-        session.add_all(git_stat_list)
-        session.commit()
-
-        select_statement = prepare_select(column_names)
-        select_statement = prepare_order_by(parse_option_sort(sort), select_statement)
-        select_statement = prepare_where(
-            parse_where_statement(filters), select_statement
-        )
-
-        sorted_rows = session.execute(select_statement)
-
-    return column_names, sorted_rows
-
-
 def process_terminating_options(repo_path: str | None, non_text: bool) -> bool:
     """Process options, after which all other options are ignored"""
     if non_text:
@@ -206,16 +150,12 @@ def git_hot(
 
     engine = create_db_engine()
     create_tables(engine)
-    log_options = GitLogOptions(since, until)
 
-    column_names, result_rows = (
-        process_query(query, engine)
-        if query is not None and query.strip() != ""
-        else process_separate_options(
-            columns, sort, filters, log_options, engine, file_path
-        )
+    input_query = query if query is not None and query.strip() !="" else parse_separate_options_into_query(
+        SeparateOptionsAsQuery(columns, file_path, sort, filters, since, until)
     )
-
+    column_names, result_rows = process_query(input_query, engine)
+        
     painted_rows = (
         TablePainterBuilder(
             column_names, [[*row] for row in result_rows], ColorPipelineBuilder()

@@ -6,8 +6,8 @@ from enums.columns import CliTableColumn
 
 
 def test_nothing_is_provided() -> None:
-    """Test nothing is provided"""
-    assert not parse_option_color()
+    """Test None is provided"""
+    assert not parse_option_color(None)
 
 
 def test_empty_string() -> None:

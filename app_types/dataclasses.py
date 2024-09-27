@@ -19,8 +19,8 @@ class FileCommitStats:
 class NumberColumnColorCondition:
     """Dataclass for column color condition, for numbers"""
 
-    start: Number
-    end: Optional[Number]
+    start: float
+    end: Optional[float]
     color: CliTableColumnColor
 
 
@@ -36,5 +36,17 @@ class SortingRule:
 class GitLogOptions:
     """Dataclass for storing git log options"""
 
+    since: Optional[str]
+    until: Optional[str]
+
+
+@dataclass
+class SeparateOptionsAsQuery:
+    """Dataclass for storing separate input options which form proper query"""
+
+    columns: Optional[str]
+    file_path: str
+    sort: Optional[str]
+    filters: Optional[str]
     since: Optional[str]
     until: Optional[str]
