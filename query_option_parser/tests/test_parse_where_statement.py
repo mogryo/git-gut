@@ -113,3 +113,33 @@ def test_invalid_conditions_raise_syntax_error() -> None:
     """Check invalid conditions raise syntax error"""
     with pytest.raises(SyntaxError):
         parse_where_statement("linecount > 100 and daratio <== d9")
+
+
+def test_lower_upper_case_or() -> None:
+    """Check lower and upper case for operator or"""
+    result = parse_where_statement("linecount > 100 or daratio <= 9").condition_node
+    assert isinstance(result, ast.BoolOp)
+    assert isinstance(result.values[0], ast.Compare)
+    assert isinstance(result.values[1], ast.Compare)
+    assert isinstance(result.op, ast.Or)
+
+    result = parse_where_statement("linecount > 100 OR daratio <= 9").condition_node
+    assert isinstance(result, ast.BoolOp)
+    assert isinstance(result.values[0], ast.Compare)
+    assert isinstance(result.values[1], ast.Compare)
+    assert isinstance(result.op, ast.Or)
+
+
+def test_lower_upper_case_and() -> None:
+    """Check lower and upper case for operator and"""
+    result = parse_where_statement("linecount > 100 and daratio <= 9").condition_node
+    assert isinstance(result, ast.BoolOp)
+    assert isinstance(result.values[0], ast.Compare)
+    assert isinstance(result.values[1], ast.Compare)
+    assert isinstance(result.op, ast.And)
+
+    result = parse_where_statement("linecount > 100 AND daratio <= 9").condition_node
+    assert isinstance(result, ast.BoolOp)
+    assert isinstance(result.values[0], ast.Compare)
+    assert isinstance(result.values[1], ast.Compare)
+    assert isinstance(result.op, ast.And)

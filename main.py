@@ -144,18 +144,21 @@ def git_hot(
     """Command entry point"""
     file_path: str = file_paths[0] if len(file_paths) > 0 else "./"
 
-    is_terminated = process_terminating_options(file_path, nontext)
-    if is_terminated:
+    if process_terminating_options(file_path, nontext):
         return
 
     engine = create_db_engine()
     create_tables(engine)
 
-    input_query = query if query is not None and query.strip() !="" else parse_separate_options_into_query(
-        SeparateOptionsAsQuery(columns, file_path, sort, filters, since, until)
+    input_query = (
+        query
+        if query is not None and query.strip() != ""
+        else parse_separate_options_into_query(
+            SeparateOptionsAsQuery(columns, file_path, sort, filters, since, until)
+        )
     )
     column_names, result_rows = process_query(input_query, engine)
-        
+
     painted_rows = (
         TablePainterBuilder(
             column_names, [[*row] for row in result_rows], ColorPipelineBuilder()

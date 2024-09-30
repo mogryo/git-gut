@@ -1,6 +1,6 @@
 """Utils mappings"""
 
-from enums.columns import CliTableColumn, SortingDirection, CliTableColumnColor
+from enums.columns import CliTableColumn, CliTableColumnColor
 
 REVERSE_COLUMN_NAME_MAPPING = {
     cli_table_column.value: cli_table_column for cli_table_column in CliTableColumn

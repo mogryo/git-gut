@@ -72,7 +72,11 @@ def parse_where_statement(where_statement: Optional[str] = "") -> WhereNode:
     if where_statement is None or where_statement.strip() == "":
         return WhereNode(None)
 
-    corrected_where_statement = where_statement.replace(" AND ", " and ").replace(" OR ", " or ").replace(" NOT ", " not ")
+    corrected_where_statement = (
+        where_statement.replace(" AND ", " and ")
+        .replace(" OR ", " or ")
+        .replace(" NOT ", " not ")
+    )
     parsed_statement = ast.parse(f"""if {corrected_where_statement }: \n\tpass""")
     return WhereNode(cast(ast.BoolOp, cast(ast.If, parsed_statement.body[0]).test))
 
