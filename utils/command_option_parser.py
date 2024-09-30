@@ -4,6 +4,7 @@ from typing import List, Optional, Dict
 
 from app_types.dataclasses import SeparateOptionsAsQuery, NumberColumnColorCondition
 from enums.columns import CliTableColumn
+from enums.user_input_keywords import QueryKeywords
 from query_option_parser.nodes import StatementNode
 from query_option_parser.parser import TOP_LEVEL_STATEMENT_PARSERS, ROOT_NODE_KEYS
 from query_option_parser.string_tokens import TOP_LEVEL_STATEMENT_KEYWORDS
@@ -55,7 +56,9 @@ def parse_option_query(statement: Optional[str]) -> StatementNode:
     for index, word in enumerate(split_text):
         if word.upper() not in TOP_LEVEL_STATEMENT_KEYWORDS:
             accumulated_text.append(word)
-        if word.upper() in TOP_LEVEL_STATEMENT_KEYWORDS or (index + 1) == len(split_text):
+        if word.upper() in TOP_LEVEL_STATEMENT_KEYWORDS or (index + 1) == len(
+            split_text
+        ):
             if active_statement in TOP_LEVEL_STATEMENT_PARSERS:
                 node = TOP_LEVEL_STATEMENT_PARSERS[active_statement](
                     " ".join(accumulated_text)
@@ -68,22 +71,24 @@ def parse_option_query(statement: Optional[str]) -> StatementNode:
 
 
 def parse_separate_options_into_query(options: SeparateOptionsAsQuery) -> str:
+    """Parse separate command options into query string"""
     statement_parts: List[str] = []
     if options.columns is not None:
-        statement_parts.append(f"SHOW {options.columns}")
+        statement_parts.append(f"{QueryKeywords.SHOW.value} {options.columns}")
 
-    statement_parts.append(f"FROM {options.file_path}")
+    if options.file_path is not None:
+        statement_parts.append(f"{QueryKeywords.FROM.value} {options.file_path}")
 
     if options.filters is not None:
-        statement_parts.append(f"WHERE {options.filters}")
+        statement_parts.append(f"{QueryKeywords.WHERE.value} {options.filters}")
 
     if options.sort is not None:
-        statement_parts.append(f"ORDERBY {options.sort}")
+        statement_parts.append(f"{QueryKeywords.ORDERBY.value} {options.sort}")
 
     if options.since is not None:
-        statement_parts.append(f"SINCE {options.since}")
+        statement_parts.append(f"{QueryKeywords.SINCE.value} {options.since}")
 
     if options.until is not None:
-        statement_parts.append(f"UNTIL {options.until}")
+        statement_parts.append(f"{QueryKeywords.UNTIL.value} {options.until}")
 
     return " ".join(statement_parts)

@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from typing import Optional
-from app_types.generics import Number
 from enums.columns import CliTableColumnColor, SortingDirection, CliTableColumn
 
 
@@ -44,9 +43,9 @@ class GitLogOptions:
 class SeparateOptionsAsQuery:
     """Dataclass for storing separate input options which form proper query"""
 
-    columns: Optional[str]
-    file_path: str
-    sort: Optional[str]
-    filters: Optional[str]
-    since: Optional[str]
-    until: Optional[str]
+    columns: Optional[str] = None
+    file_path: Optional[str] = None
+    sort: Optional[str] = None
+    filters: Optional[str] = None
+    since: Optional[str] = None
+    until: Optional[str] = None

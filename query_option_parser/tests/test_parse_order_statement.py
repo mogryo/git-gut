@@ -36,3 +36,29 @@ def test_invalid_sort_direction_multiple_sort() -> None:
     assert len(result.sort_rule_nodes) == 1
     assert result.sort_rule_nodes[0].column_name == CliTableColumn.LINE_COUNT
     assert result.sort_rule_nodes[0].sort_direction == SortingDirection.ASC
+
+
+def test_lower_uppercase_asc() -> None:
+    """Check when asc is lower/upper case"""
+    result = parse_order_statement("linecount asc")
+    assert len(result.sort_rule_nodes) == 1
+    assert result.sort_rule_nodes[0].column_name == CliTableColumn.LINE_COUNT
+    assert result.sort_rule_nodes[0].sort_direction == SortingDirection.ASC
+
+    result = parse_order_statement("linecount ASC")
+    assert len(result.sort_rule_nodes) == 1
+    assert result.sort_rule_nodes[0].column_name == CliTableColumn.LINE_COUNT
+    assert result.sort_rule_nodes[0].sort_direction == SortingDirection.ASC
+
+
+def test_lower_uppercase_desc() -> None:
+    """Check when desck is lower/upper case"""
+    result = parse_order_statement("linecount desc")
+    assert len(result.sort_rule_nodes) == 1
+    assert result.sort_rule_nodes[0].column_name == CliTableColumn.LINE_COUNT
+    assert result.sort_rule_nodes[0].sort_direction == SortingDirection.DESC
+
+    result = parse_order_statement("linecount DESC")
+    assert len(result.sort_rule_nodes) == 1
+    assert result.sort_rule_nodes[0].column_name == CliTableColumn.LINE_COUNT
+    assert result.sort_rule_nodes[0].sort_direction == SortingDirection.DESC

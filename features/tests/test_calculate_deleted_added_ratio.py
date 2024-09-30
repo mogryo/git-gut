@@ -1,15 +1,12 @@
 """Test calculate_deleted_added_ratio"""
 
-from statistics import StatisticsError
-import pytest
 from app_types.dataclasses import FileCommitStats
 from features.technical_debt import calculate_deleted_added_ratio
 
 
 def test_empty_list() -> None:
-    """Test empty commit stat list, should throw error"""
-    with pytest.raises(StatisticsError):
-        calculate_deleted_added_ratio([])
+    """Test empty commit stat list, should return zero"""
+    assert calculate_deleted_added_ratio([]) == 0
 
 
 def test_zero_added_value() -> None:
