@@ -19,7 +19,6 @@ pytest-mock = "^3.14.0"
 pylint = "^3.2.3"
 SQLAlchemy = "^2.0.30"
 typing-extensions = "^4.12.1"
-pydantic = "^2.9.2"
 pydash = "^8.0.3"
 
 
