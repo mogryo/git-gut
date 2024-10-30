@@ -6,7 +6,7 @@ from utils.command_option_parser import parse_option_query
 
 def test_only_show_statement() -> None:
     """Check when only show column statement is present"""
-    result = parse_option_query("SHOW linecount, daratio")
+    result = parse_option_query("SHOW linecount, daratio").value
     assert len(result.show_node.column_names) == 2
     assert result.from_node is None
     assert result.order_node is None
@@ -15,7 +15,7 @@ def test_only_show_statement() -> None:
 
 def test_only_from_statement() -> None:
     """Check when only from statement is present"""
-    result = parse_option_query("FROM ./")
+    result = parse_option_query("FROM ./").value
     assert result.show_node is None
     assert result.from_node.path == "./"
     assert result.order_node is None
@@ -24,7 +24,7 @@ def test_only_from_statement() -> None:
 
 def test_only_order_statement() -> None:
     """Check when only order (sort) statement is present"""
-    result = parse_option_query("ORDERBY daratio ASC and linecount DESC")
+    result = parse_option_query("ORDERBY daratio ASC and linecount DESC").value
     assert result.show_node is None
     assert result.from_node is None
     assert len(result.order_node.sort_rule_nodes) == 2
@@ -40,7 +40,7 @@ def test_only_order_statement() -> None:
 
 def test_only_where_statement() -> None:
     """Check when only where statement is present"""
-    result = parse_option_query("WHERE linecount > 0 and daratio > 0.5")
+    result = parse_option_query("WHERE linecount > 0 and daratio > 0.5").value
     assert result.show_node is None
     assert result.from_node is None
     assert result.order_node is None
@@ -53,7 +53,7 @@ def test_full_valid_statement() -> None:
     result = parse_option_query(
         "SHOW linecount, daratio FROM ./ WHERE linecount > 100 and daratio < 1"
         " ORDERBY daratio ASC and linecount DESC"
-    )
+    ).value
     assert len(result.show_node.column_names) == 2
     assert result.from_node.path == "./"
     assert len(result.where_node.condition_node.values) == 2

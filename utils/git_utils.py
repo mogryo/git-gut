@@ -4,8 +4,9 @@ import asyncio
 import os
 from typing import List, Callable, Dict, cast, Optional
 from statistics import mode
-from git import Tree, Git
+from git import Tree, Git, Repo, exc
 from app_types.dataclasses import FileCommitStats, GitLogOptions
+from app_types.result import ResultUnion, ResultOk, ResultException
 from utils.numbers import is_number
 from utils.text import trim_side_quotes
 
@@ -295,3 +296,13 @@ def get_non_text_files(git_instance: Git) -> List[str]:
                 result.append(existing_file)
 
     return result
+
+
+def get_repo_instance(
+    repo_path: str,
+) -> ResultUnion[Repo, None, exc.InvalidGitRepositoryError]:
+    """Create git Repo instance"""
+    try:
+        return ResultOk(Repo(repo_path, search_parent_directories=True))
+    except exc.InvalidGitRepositoryError as error:
+        return ResultException(repo_path, error)

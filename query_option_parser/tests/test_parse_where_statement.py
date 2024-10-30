@@ -2,13 +2,15 @@
 
 import ast
 from typing import cast
-import pytest
+
+from app_types.node_validation_errors import NodeValidationError
+from app_types.result import ResultValidationError
 from query_option_parser.parser import parse_where_statement
 
 
 def test_valid_single_condition() -> None:
     """Check valid single condition"""
-    result = parse_where_statement("linecount > 100").condition_node
+    result = parse_where_statement("linecount > 100").value.condition_node
     assert isinstance(result, ast.Compare)
     assert cast(ast.Name, result.left).id == "linecount"
     assert isinstance(result.ops[0], ast.Gt)
@@ -17,7 +19,9 @@ def test_valid_single_condition() -> None:
 
 def test_valid_multiple_conditions_with_and() -> None:
     """Check multiple valid conditions, joined by and"""
-    result = parse_where_statement("linecount > 100 and daratio <= 9").condition_node
+    result = parse_where_statement(
+        "linecount > 100 and daratio <= 9"
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.Compare)
@@ -40,7 +44,9 @@ def test_valid_multiple_conditions_with_and() -> None:
 
 def test_valid_multiple_conditions_with_or() -> None:
     """Check multiple valid conditions, joined by or"""
-    result = parse_where_statement("linecount > 100 or daratio <= 9").condition_node
+    result = parse_where_statement(
+        "linecount > 100 or daratio <= 9"
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.Compare)
@@ -65,7 +71,7 @@ def test_valid_nested_conditions() -> None:
     """Check multiple nested conditions"""
     result = parse_where_statement(
         "linecount > 100 and (daratio <= 9 or maauthor == 'mogryo')"
-    ).condition_node
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.BoolOp)
@@ -106,24 +112,30 @@ def test_valid_nested_conditions() -> None:
 def test_empty_condition() -> None:
     """Check empty condition"""
     result = parse_where_statement()
-    assert result.condition_node is None
+    assert result.value.condition_node is None
 
 
 def test_invalid_conditions_raise_syntax_error() -> None:
     """Check invalid conditions raise syntax error"""
-    with pytest.raises(SyntaxError):
-        parse_where_statement("linecount > 100 and daratio <== d9")
+    result = parse_where_statement("linecount > 100 and daratio <== d9")
+    assert isinstance(result, ResultValidationError)
+    assert len(result.validation_error) == 1
+    assert isinstance(result.validation_error[0], NodeValidationError)
 
 
 def test_lower_upper_case_or() -> None:
     """Check lower and upper case for operator or"""
-    result = parse_where_statement("linecount > 100 or daratio <= 9").condition_node
+    result = parse_where_statement(
+        "linecount > 100 or daratio <= 9"
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.Compare)
     assert isinstance(result.op, ast.Or)
 
-    result = parse_where_statement("linecount > 100 OR daratio <= 9").condition_node
+    result = parse_where_statement(
+        "linecount > 100 OR daratio <= 9"
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.Compare)
@@ -132,13 +144,17 @@ def test_lower_upper_case_or() -> None:
 
 def test_lower_upper_case_and() -> None:
     """Check lower and upper case for operator and"""
-    result = parse_where_statement("linecount > 100 and daratio <= 9").condition_node
+    result = parse_where_statement(
+        "linecount > 100 and daratio <= 9"
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.Compare)
     assert isinstance(result.op, ast.And)
 
-    result = parse_where_statement("linecount > 100 AND daratio <= 9").condition_node
+    result = parse_where_statement(
+        "linecount > 100 AND daratio <= 9"
+    ).value.condition_node
     assert isinstance(result, ast.BoolOp)
     assert isinstance(result.values[0], ast.Compare)
     assert isinstance(result.values[1], ast.Compare)

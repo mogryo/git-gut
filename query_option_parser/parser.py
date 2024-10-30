@@ -1,10 +1,13 @@
 """Parser functions"""
 
 import ast
-import sys
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, cast
+from itertools import batched
 
-from enums.columns import SortingDirection, CliTableColumn
+from app_types.node_validation_errors import NodeValidationError
+from app_types.result import ResultOk, ResultValidationError, ResultUnion
+from enums.application import Severity
+from enums.columns import CliTableColumn
 from query_option_parser.nodes import (
     IntervalNode,
     ShowNode,
@@ -13,103 +16,97 @@ from query_option_parser.nodes import (
     FromNode,
     WhereNode,
 )
-from command_interface.help_text import COMMAND_OPTION_COLUMN_NAMES
+from query_option_parser.parser_utils import (
+    split_sort_rule_string,
+    extract_since_and_until_interval,
+)
 from utils.mappings import REVERSE_COLUMN_NAME_MAPPING
+from validators.statement_validators import is_column_name, is_valid_sort
 
 
-def is_column_name(text: str) -> bool:
-    """Check if word is column name"""
-    return text in COMMAND_OPTION_COLUMN_NAMES
-
-
-def is_valid_sort(
-    column_name: CliTableColumn | None,
-    sort_direction: SortingDirection | None,
-) -> bool:
-    """Check if sort is valid"""
-    return isinstance(column_name, CliTableColumn) and isinstance(
-        sort_direction, SortingDirection
-    )
-
-
-def split_sort_rule_string(
-    sort_string: str,
-) -> Tuple[CliTableColumn | None, SortingDirection | None]:
-    """Split single sort rule into two parts"""
-    split_sort = sort_string.split()
-    sorting_enum_keys = list(
-        filter(lambda x: not x.startswith("_"), dir(SortingDirection))
-    )
-    column_names = list(filter(lambda x: not x.startswith("_"), dir(CliTableColumn)))
-
-    column_name = next(
-        (
-            name
-            for name in column_names
-            if len(split_sort) == 2
-            and CliTableColumn[name].value.upper() == split_sort[0].upper()
-        ),
-        None,
-    )
-    sorting_direction = next(
-        (
-            key
-            for key in sorting_enum_keys
-            if len(split_sort) == 2
-            and SortingDirection[key].value.upper() == split_sort[1].upper()
-        ),
-        None,
-    )
-
-    return (
-        CliTableColumn[column_name] if column_name is not None else None,
-        SortingDirection[sorting_direction] if sorting_direction is not None else None,
-    )
-
-
-def parse_where_statement(where_statement: Optional[str] = "") -> WhereNode:
+def parse_where_statement(
+    where_statement: Optional[str] = "",
+) -> ResultUnion[WhereNode]:
     """Parse statement with Python ast module"""
     if where_statement is None or where_statement.strip() == "":
-        return WhereNode(None)
+        return ResultOk(WhereNode(None))
 
     corrected_where_statement = (
         where_statement.replace(" AND ", " and ")
         .replace(" OR ", " or ")
         .replace(" NOT ", " not ")
     )
-    parsed_statement = ast.parse(f"""if {corrected_where_statement }: \n\tpass""")
-    return WhereNode(cast(ast.BoolOp, cast(ast.If, parsed_statement.body[0]).test))
+    try:
+        parsed_ast_statement = ast.parse(
+            f"""if {corrected_where_statement }: \n\tpass"""
+        )
+    except SyntaxError:
+        return ResultValidationError(
+            where_statement,
+            [
+                NodeValidationError(
+                    corrected_where_statement,
+                    "Couldn't parse condition",
+                    Severity.CRITICAL,
+                )
+            ],
+        )
+
+    return ResultOk(
+        WhereNode(cast(ast.BoolOp, cast(ast.If, parsed_ast_statement.body[0]).test))
+    )
 
 
-def parse_show_statement(show_statement: Optional[str]) -> ShowNode:
+def parse_show_statement(
+    show_statement: Optional[str],
+) -> ResultUnion[ShowNode, NodeValidationError, None]:
     """Parse show statement"""
     string_column_names = (show_statement or "").replace(" ", "").split(",")
 
+    validation_errors = [
+        NodeValidationError(column_name, "Incorrect column name", Severity.CRITICAL)
+        for column_name in string_column_names
+        if not is_column_name(column_name)
+    ]
+    if len(validation_errors) != 0:
+        return ResultValidationError(show_statement, validation_errors)
+
     enum_column_names: List[CliTableColumn] = []
     for column_name in string_column_names:
-        if is_column_name(column_name):
-            enum_column_names.append(REVERSE_COLUMN_NAME_MAPPING[column_name])
+        enum_column_names.append(REVERSE_COLUMN_NAME_MAPPING[column_name])
 
-    return ShowNode(enum_column_names)
+    return ResultOk(ShowNode(enum_column_names))
 
 
-def parse_order_statement(order_statement: Optional[str]) -> OrderNode:
+def parse_order_statement(order_statement: Optional[str]) -> ResultUnion[OrderNode]:
     """Parse order(sort) statement"""
+    parsed_order_statement = (
+        (order_statement or "").replace(" AND ", " and ").split(" and ")
+    )
+    validation_errors = [
+        NodeValidationError(sort_rule, "Incorrect sort rule", Severity.CRITICAL)
+        for sort_rule in parsed_order_statement
+        if not is_valid_sort(*split_sort_rule_string(sort_rule))
+    ]
+    if len(validation_errors) != 0:
+        return ResultValidationError(order_statement, validation_errors)
+
     sort_rule_nodes: List[SortRuleNode] = []
-    for sort_rule in (order_statement or "").replace(" AND ", " and ").split(" and "):
+    for sort_rule in parsed_order_statement:
         column_name, sort_direction = split_sort_rule_string(sort_rule)
-        if is_valid_sort(column_name, sort_direction):
-            sort_rule_nodes.append(SortRuleNode(column_name, sort_direction))
+        sort_rule_nodes.append(SortRuleNode(column_name, sort_direction))
 
-    return OrderNode(sort_rule_nodes)
+    return ResultOk(OrderNode(sort_rule_nodes))
 
 
-def parse_from_statement(from_statement: Optional[str] = "") -> FromNode:
+def parse_from_statement(from_statement: Optional[str] = "") -> ResultOk[FromNode]:
     """Parse from statement"""
-    return FromNode(from_statement if from_statement is not None else "")
+    return ResultOk(FromNode(from_statement if from_statement is not None else ""))
 
 
-def parse_interval_statement(interval_statement: Optional[str] = "") -> IntervalNode:
+def parse_interval_statement(
+    interval_statement: Optional[str] = "",
+) -> ResultUnion[IntervalNode, NodeValidationError]:
     """Parse interval statement"""
     split_words = (
         [word.upper() for word in interval_statement.split()]
@@ -118,24 +115,33 @@ def parse_interval_statement(interval_statement: Optional[str] = "") -> Interval
     )
 
     if not (len(split_words) == 2 or len(split_words) == 4):
-        print("Please specify correct INTERVAL")
-        sys.exit()
+        return ResultValidationError(
+            interval_statement,
+            [
+                NodeValidationError(
+                    ", ".join(split_words),
+                    "Please specify correct INTERVAL",
+                    Severity.CRITICAL,
+                )
+            ],
+        )
 
     since: str | None = None
     until: str | None = None
-    if len(split_words) > 1:
-        if split_words[0] == "SINCE" or split_words[0] == "AFTER":
-            since = split_words[1]
-        elif split_words[0] == "UNTIL" or split_words[0] == "BEFORE":
-            until = split_words[1]
+    validation_errors = []
 
-    if len(split_words) == 4:
-        if split_words[2] == "SINCE" or split_words[2] == "AFTER":
-            since = split_words[3]
-        elif split_words[2] == "UNTIL" or split_words[2] == "BEFORE":
-            until = split_words[3]
+    for single_interval_words in list(batched(split_words, 2)):
+        extraction_result = extract_since_and_until_interval(single_interval_words)
+        match extraction_result:
+            case ResultValidationError():
+                validation_errors.extend(extraction_result.validation_error)
+            case ResultOk():
+                since, until = extraction_result.value
 
-    return IntervalNode(since, until)
+    if len(validation_errors) > 0:
+        return ResultValidationError(interval_statement, validation_errors)
+
+    return ResultOk(IntervalNode(since, until))
 
 
 TOP_LEVEL_STATEMENT_PARSERS = {

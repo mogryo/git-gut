@@ -1,7 +1,7 @@
 """Test is_column_name"""
 
 from enums.columns import CliTableColumn
-from query_option_parser.parser import is_column_name
+from validators.statement_validators import is_column_name
 
 
 def test_column_name_is_detected() -> None:
