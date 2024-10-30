@@ -111,7 +111,7 @@ def until_option(func) -> Command:
     )(func)
 
 
-def since_otion(func) -> Command:
+def since_option(func) -> Command:
     """Since/after option"""
     return option(
         "--since",

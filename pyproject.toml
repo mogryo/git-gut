@@ -19,6 +19,8 @@ pytest-mock = "^3.14.0"
 pylint = "^3.2.3"
 SQLAlchemy = "^2.0.30"
 typing-extensions = "^4.12.1"
+pydantic = "^2.9.2"
+pydash = "^8.0.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -27,3 +29,7 @@ black = {extras = ["d"], version = "^24.4.2"}
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+venvPath = "/Users/tadas.baikstis/Library/Caches/pypoetry/virtualenvs/git-gut-YknkvPg0-py3.12"
+venv = "/Users/tadas.baikstis/Library/Caches/pypoetry/virtualenvs/git-gut-YknkvPg0-py3.12/bin/python"

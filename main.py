@@ -1,21 +1,21 @@
 """Main file of application"""
 
-import sys
 from typing import Optional, Tuple, List, Dict
 import click
-from git import Repo, Git, exc
+from git import Repo, Git
 from prettytable import PrettyTable
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine, Result
 
 from app_types.dataclasses import FileCommitStats, GitLogOptions, SeparateOptionsAsQuery
+from app_types.result import ResultUnion
 from builders.color_pipeline_builder import ColorPipelineBuilder
 from builders.column_data_builder import ColumnDataBuilder
 from builders.table_data_builder import TableDataBuilder
 from builders.table_painter_builder import TablePainterBuilder
 from command_interface.options import (
     columns_option,
-    since_otion,
+    since_option,
     sort_option,
     colors_option,
     filter_option,
@@ -34,12 +34,15 @@ from utils.git_utils import (
     get_non_text_files,
     get_all_files_stats,
     get_flat_file_tree,
+    get_repo_instance,
 )
 from utils.database import create_db_engine, create_tables
 from repositories.git_stat_repo import (
     prepare_all_rows,
     prepare_query_statement,
 )
+from validators.repo_validators import assert_repo_result_is_valid
+from validators.root_node_validators import assert_root_node_result_is_valid
 
 
 def process_query(
@@ -48,21 +51,14 @@ def process_query(
 ) -> Tuple[List[CliTableColumn], Result]:
     """Process query option provided"""
     all_files_stats: Dict[str, List[FileCommitStats]]
-    root_node = parse_option_query(query)
+    root_node_result = parse_option_query(query)
 
-    if root_node.from_node is None:
-        print("FROM path was not provided")
-        sys.exit()
-    if root_node.show_node is None:
-        print("SHOW columns are not valid")
-        sys.exit()
+    assert_root_node_result_is_valid(root_node_result)
+    root_node = root_node_result.value
 
-    repo: Repo
-    try:
-        repo = Repo(root_node.from_node.path, search_parent_directories=True)
-    except exc.InvalidGitRepositoryError:
-        print("Provided FROM path is not GIT repository")
-        sys.exit()
+    repo_result: ResultUnion[Repo] = get_repo_instance(root_node.from_node.path)
+    assert_repo_result_is_valid(repo_result)
+    repo: Repo = repo_result.value
 
     flat_file_tree = get_flat_file_tree(
         repo.head.commit.tree,
@@ -127,7 +123,7 @@ def process_terminating_options(repo_path: str | None, non_text: bool) -> bool:
 @filter_option
 @query_option
 @non_text_files_option
-@since_otion
+@since_option
 @until_option
 # pylint: disable = too-many-arguments
 def git_hot(
