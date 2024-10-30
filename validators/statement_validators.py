@@ -13,7 +13,7 @@ def is_column_name(text: str) -> bool:
 
 def are_column_names_valid(column_names: List[str]) -> bool:
     """Validate provided column names"""
-    return every(column_names, lambda x: is_column_name(x))
+    return every(column_names, is_column_name)
 
 
 def is_valid_sort(
