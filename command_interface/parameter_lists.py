@@ -18,4 +18,6 @@ AVAILABLE_SORT = list(
     )
 )
 AVAILABLE_SIGNS = list(ALLOWED_SIGNS)
-AVAILABLE_TABLE_LIBS = [lib for lib in dir(TableLibrary) if not lib.startswith("_")]
+AVAILABLE_TABLE_LIBS = [
+    TableLibrary[lib].value for lib in dir(TableLibrary) if not lib.startswith("_")
+]
