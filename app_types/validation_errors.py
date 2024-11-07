@@ -12,3 +12,12 @@ class NodeValidationError:
     statement_part: str
     message: str
     severity: Severity
+
+
+@dataclass
+class InvalidTableLibraryError:
+    """Invalid table library error"""
+
+    user_input: str
+    message: str
+    severity: Severity

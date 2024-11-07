@@ -4,10 +4,10 @@ import ast
 from typing import List, Optional, cast
 from itertools import batched
 
-from app_types.node_validation_errors import NodeValidationError
+from app_types.validation_errors import NodeValidationError
 from app_types.result import ResultOk, ResultValidationError, ResultUnion
 from enums.application import Severity
-from enums.columns import CliTableColumn
+from enums.table import CliTableColumn
 from query_option_parser.nodes import (
     IntervalNode,
     ShowNode,

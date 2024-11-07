@@ -3,7 +3,7 @@
 from typing import List
 from pydash import every
 from command_interface.help_text import COMMAND_OPTION_COLUMN_NAMES
-from enums.columns import CliTableColumn, SortingDirection
+from enums.table import CliTableColumn, SortingDirection
 
 
 def is_column_name(text: str) -> bool:

@@ -1,6 +1,6 @@
 """Test prepare_all_rows"""
 
-from enums.columns import CliTableColumn
+from enums.table import CliTableColumn
 from repositories.git_stat_repo import prepare_all_rows
 
 

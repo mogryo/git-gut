@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from app_types.generics import Number
-from enums.columns import SortingDirection, CliTableColumn
+from enums.table import SortingDirection, CliTableColumn
 
 
 @dataclass

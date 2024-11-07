@@ -3,9 +3,9 @@
 from typing import Tuple, List
 
 from app_types.result import ResultUnion, ResultValidationError, ResultOk
-from app_types.node_validation_errors import NodeValidationError
+from app_types.validation_errors import NodeValidationError
 from enums.application import Severity
-from enums.columns import CliTableColumn, SortingDirection
+from enums.table import CliTableColumn, SortingDirection
 
 
 def split_sort_rule_string(

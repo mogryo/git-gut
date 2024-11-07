@@ -29,7 +29,7 @@ class CliTableColumnLabel(Enum):
     LINECOUNT = "Line count"
 
 
-class CliTableColumnColor(Enum):
+class PrettyTableColumnColor(Enum):
     """Enum for table column colors"""
 
     RED = "\033[0;31;40m"

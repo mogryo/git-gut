@@ -6,15 +6,15 @@ from command_interface.help_text import (
     COMMAND_OPTION_COLUMN_NAMES_TEXT,
     COLUMN_OPTION_EXAMPLE,
     SORT_OPTION_EXAMPLE,
-    AVAILABLE_CELL_COLORS_TEXT,
     AVAILABLE_SORT_TEXT,
     AVAILABLE_SIGNS_TEXT,
+    AVAILABLE_TABLE_LIBS_TEXT,
 )
 from defaults.command import (
     DEFAULT_COLUMNS,
     DEFAULT_SORT,
-    DEFAULT_COLORS,
 )
+from enums.application import TableLibrary
 
 
 def columns_option(func) -> Command:
@@ -38,19 +38,6 @@ def sort_option(func) -> Command:
             Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
             Sort variants: {AVAILABLE_SORT_TEXT}\n
             Example of input: --sort={SORT_OPTION_EXAMPLE}
-        """,
-    )(func)
-
-
-def colors_option(func) -> Command:
-    """Colors option decorator"""
-    return option(
-        "--colors",
-        default=DEFAULT_COLORS,
-        help=f"""
-            Column names: {COMMAND_OPTION_COLUMN_NAMES_TEXT}\n
-            Available colors: {AVAILABLE_CELL_COLORS_TEXT}\n
-            Example of input: --colors=daratio-0,0.15,green/0.15,0.3,yellow/0.3,,red;
         """,
     )(func)
 
@@ -120,5 +107,16 @@ def since_option(func) -> Command:
         help="""
             Specify the date since which to gather git logs.
             Format: YYYY-MM-DD
+        """,
+    )(func)
+
+
+def table_option(func) -> Command:
+    """Table choice option"""
+    return option(
+        "--table",
+        default=TableLibrary.PRETTY_TABLE.value,
+        help=f"""
+            Specify which CLI table you want to use: {AVAILABLE_TABLE_LIBS_TEXT}
         """,
     )(func)
