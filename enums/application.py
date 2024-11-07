@@ -10,3 +10,10 @@ class Severity(Enum):
     HIGH = "HIGH"
     INFO = "INFO"
     WARNING = "WARNING"
+
+
+class TableLibrary(Enum):
+    """Options for CLI table library"""
+
+    PRETTY_TABLE = "pretty"
+    RICH_TABLE = "rich"

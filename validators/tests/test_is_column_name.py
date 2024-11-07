@@ -1,6 +1,6 @@
 """Test is_column_name"""
 
-from enums.columns import CliTableColumn
+from enums.table import CliTableColumn
 from validators.statement_validators import is_column_name
 
 

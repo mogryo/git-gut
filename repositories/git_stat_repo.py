@@ -2,7 +2,7 @@
 
 from typing import List, Any
 from sqlalchemy import select, Select, asc, desc
-from enums.columns import CliTableColumn, SortingDirection
+from enums.table import CliTableColumn, SortingDirection
 from orm.git_stat import GitStat
 from app_types.dataclasses import SortingRule
 from query_option_parser.nodes import WhereNode, OrderNode, StatementNode, ShowNode

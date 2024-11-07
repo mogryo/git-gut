@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from typing import Optional
-from enums.columns import CliTableColumnColor, SortingDirection, CliTableColumn
+from enums.table import SortingDirection, CliTableColumn
 
 
 @dataclass
@@ -12,15 +12,6 @@ class FileCommitStats:
     added_lines: int
     removed_lines: int
     author: str
-
-
-@dataclass
-class NumberColumnColorCondition:
-    """Dataclass for column color condition, for numbers"""
-
-    start: float
-    end: Optional[float]
-    color: CliTableColumnColor
 
 
 @dataclass

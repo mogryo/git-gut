@@ -1,56 +1,19 @@
 """Command option parsers"""
 
-from typing import List, Optional, Dict, cast, Any
+from typing import List, Optional, cast, Any
 
-from app_types.dataclasses import SeparateOptionsAsQuery, NumberColumnColorCondition
-from app_types.node_validation_errors import NodeValidationError
+from app_types.dataclasses import SeparateOptionsAsQuery
+from app_types.validation_errors import NodeValidationError
 from app_types.result import (
     ResultOk,
     ResultValidationError,
     ResultException,
     ResultUnion,
 )
-from enums.columns import CliTableColumn
 from enums.user_input_keywords import QueryKeywords
 from query_option_parser.nodes import StatementNode
 from query_option_parser.parser import TOP_LEVEL_STATEMENT_PARSERS, ROOT_NODE_KEYS
 from query_option_parser.string_tokens import TOP_LEVEL_STATEMENT_KEYWORDS
-from utils.mappings import (
-    REVERSE_COLUMN_NAME_MAPPING,
-    COLOR_MAPPING,
-)
-
-
-def parse_option_color(
-    color_string: Optional[str],
-) -> Dict[CliTableColumn, List[NumberColumnColorCondition]]:
-    """
-    Split single string into list of color conditions
-    Format: column_name-0,0.15,green/0.15,0.3,yellow/0.3,,RED;...
-    :param color_string: String with color conditions
-    :return: Color condition list
-    """
-    result: Dict[CliTableColumn, List[NumberColumnColorCondition]] = {}
-
-    for str_color_condition in (color_string or "").split(";"):
-        if str_color_condition.strip() == "":
-            continue
-
-        column_name = str_color_condition.split("-")[0]
-        str_ranges = str_color_condition.split("-")[1].split("/")
-        color_conditions: List[NumberColumnColorCondition] = []
-        for str_range in str_ranges:
-            split_range = str_range.split(",")
-            color_conditions.append(
-                NumberColumnColorCondition(
-                    float(split_range[0]) if split_range[0] != "" else 0,
-                    float(split_range[1]) if split_range[1] != "" else None,
-                    COLOR_MAPPING[split_range[2].upper()],
-                )
-            )
-        result[REVERSE_COLUMN_NAME_MAPPING[column_name]] = color_conditions
-
-    return result
 
 
 def parse_option_query(

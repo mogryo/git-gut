@@ -1,6 +1,6 @@
 """Test is_valid_sort"""
 
-from enums.columns import SortingDirection, CliTableColumn
+from enums.table import SortingDirection, CliTableColumn
 from validators.statement_validators import is_valid_sort
 
 

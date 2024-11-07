@@ -5,7 +5,7 @@ import sys
 from typing import List, cast
 from sqlalchemy import and_, or_, asc, desc, UnaryExpression, ColumnExpressionArgument
 
-from enums.columns import SortingDirection, CliTableColumn
+from enums.table import SortingDirection, CliTableColumn
 from orm.git_stat import GitStat
 from query_option_parser.nodes import SortRuleNode, ShowNode
 

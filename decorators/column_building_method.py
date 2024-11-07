@@ -1,6 +1,6 @@
 """Column building method decorator"""
 
-from enums.columns import CliTableColumn
+from enums.table import CliTableColumn
 
 
 def column_building_method(column: CliTableColumn):

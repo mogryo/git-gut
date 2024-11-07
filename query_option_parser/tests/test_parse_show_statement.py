@@ -1,8 +1,8 @@
 """Test parse_show_statement"""
 
-from app_types.node_validation_errors import NodeValidationError
+from app_types.validation_errors import NodeValidationError
 from app_types.result import ResultValidationError
-from enums.columns import CliTableColumn
+from enums.table import CliTableColumn
 from query_option_parser.parser import parse_show_statement
 
 

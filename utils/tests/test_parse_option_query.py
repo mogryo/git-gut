@@ -1,6 +1,6 @@
 """Test parse_root_statement"""
 
-from enums.columns import CliTableColumn, SortingDirection
+from enums.table import CliTableColumn, SortingDirection
 from utils.command_option_parser import parse_option_query
 
 

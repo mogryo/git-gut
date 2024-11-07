@@ -3,7 +3,7 @@
 from collections import OrderedDict
 from typing import Self, List, Any
 from builders.column_data_builder import ColumnDataBuilder
-from enums.columns import CliTableColumn
+from enums.table import CliTableColumn
 
 
 class TableDataBuilder:
