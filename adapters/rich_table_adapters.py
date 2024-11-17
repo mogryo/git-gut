@@ -1,8 +1,16 @@
 """Adapter for rich table to suit common interface (protocol)"""
 
-from typing import List, Any
+from typing import List, Any, Optional
 from rich.table import Table
 from rich.console import Console
+
+from enums.table import AvailableTableRowColors
+
+MAP_COLOR_TO_RICH_COLOR = {
+    AvailableTableRowColors.GREEN: "green",
+    AvailableTableRowColors.YELLOW: "yellow",
+    AvailableTableRowColors.RED: "red",
+}
 
 
 class RichTableAdapter:
@@ -12,9 +20,12 @@ class RichTableAdapter:
         """Constructor"""
         self._table = Table()
 
-    def add_row(self, row: List[Any]) -> None:
+    def add_row(self, row: List[Any], color: Optional[AvailableTableRowColors]) -> None:
         """Add row to a table"""
-        self._table.add_row(*row)
+        if color is None:
+            self._table.add_row(*row)
+        else:
+            self._table.add_row(*row, style=MAP_COLOR_TO_RICH_COLOR[color])
 
     @property
     def field_names(self) -> List[str]:

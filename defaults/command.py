@@ -16,3 +16,14 @@ DEFAULT_SORT = ",".join(
         f"{CliTableColumn.LINE_COUNT.value}-{SortingDirection.DESC.value}",
     ]
 )
+
+DEFAULT_COLORS = [
+    (
+        CliTableColumn.LINE_COUNT,
+        {"green": (0, 250), "yellow": (250, 400), "red": (400,)},
+    ),
+    (
+        CliTableColumn.DELETED_ADDED_RATIO,
+        {"green": (0, 0.5), "yellow": (0.5, 0.9), "red": (0.9,)},
+    ),
+]

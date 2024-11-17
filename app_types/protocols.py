@@ -1,6 +1,8 @@
 """Protocol classes for application"""
 
-from typing import Protocol, List, Any
+from typing import Protocol, List, Any, Optional
+
+from enums.table import AvailableTableRowColors
 
 
 class CliTable(Protocol):
@@ -9,7 +11,7 @@ class CliTable(Protocol):
     def __init__(self):
         """Constructor"""
 
-    def add_row(self, row: Any, *, divider: bool = False):
+    def add_row(self, row: Any, color: Optional[AvailableTableRowColors]):
         """Add row to table."""
 
     @property
