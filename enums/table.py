@@ -36,7 +36,17 @@ class PrettyTableColumnColor(Enum):
     GREEN = "\033[0;32;40m"
     YELLOW = "\033[0;33;40m"
     BLUE = "\033[0;34;40m"
+    MAGENTA = "\033[0;35;40m"
+    PURPLE = "\033[0;36;40m"
     RESET = "\033[0m"
+
+
+class AvailableTableRowColors(Enum):
+    """Enum for possible colors for table"""
+
+    GREEN = "green"
+    YELLOW = "yellow"
+    RED = "red"
 
 
 class SortingDirection(Enum):

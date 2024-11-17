@@ -1,7 +1,15 @@
 """Adapter for pretty table to suit common interface (protocol)"""
 
-from typing import List, Any
+from typing import List, Any, Optional
 from prettytable import PrettyTable
+
+from enums.table import AvailableTableRowColors, PrettyTableColumnColor
+
+MAP_COLOR_TO_PRETTY_COLOR = {
+    AvailableTableRowColors.GREEN: PrettyTableColumnColor.GREEN.value,
+    AvailableTableRowColors.YELLOW: PrettyTableColumnColor.YELLOW.value,
+    AvailableTableRowColors.RED: PrettyTableColumnColor.RED.value,
+}
 
 
 class PrettyTableAdapter:
@@ -11,9 +19,17 @@ class PrettyTableAdapter:
         """Constructor"""
         self._table = PrettyTable()
 
-    def add_row(self, row: List[Any]) -> None:
+    def add_row(self, row: List[Any], color: Optional[AvailableTableRowColors]) -> None:
         """Add row to a table"""
-        self._table.add_row(row)
+        if color is None:
+            self._table.add_row(*row)
+        else:
+            self._table.add_row(
+                [
+                    f"{MAP_COLOR_TO_PRETTY_COLOR[color]}{col}{PrettyTableColumnColor.RESET.value}"
+                    for col in row
+                ]
+            )
 
     @property
     def field_names(self) -> List[str]:
