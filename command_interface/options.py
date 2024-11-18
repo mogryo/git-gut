@@ -1,5 +1,7 @@
 """Command options decorators"""
 
+from email.policy import default
+
 from click import option, Command
 
 from command_interface.help_text import (
@@ -118,5 +120,57 @@ def table_option(func) -> Command:
         default=TableLibrary.PRETTY_TABLE.value,
         help=f"""
             Specify which CLI table you want to use: {AVAILABLE_TABLE_LIBS_TEXT}
+        """,
+    )(func)
+
+
+def save_query_option(func) -> Command:
+    """Save currently executing query"""
+    return option(
+        "--save-query",
+        "--sq",
+        default=None,
+        help=f"""
+            Save currently executing query with provided name
+        """,
+    )(func)
+
+
+def execute_stored_query_option(func) -> Command:
+    """Execute previously store query"""
+    return option(
+        "--execute-query",
+        "--eq",
+        default=None,
+        help=f"""
+            Execute previously stored query with provided name.
+            This is terminating option - all other options are ignored.
+        """,
+    )(func)
+
+
+def show_stored_queries_option(func) -> Command:
+    """Show all stored queries"""
+    return option(
+        "--list-queries",
+        "--lq",
+        is_flag=True,
+        default=False,
+        help=f"""
+            List all stored queries.
+            This is terminating option - all other options are ignored.
+        """,
+    )(func)
+
+
+def remove_stored_query(func) -> Command:
+    """Remove stored query"""
+    return option(
+        "--remove-query",
+        "--rq",
+        default=None,
+        help=f"""
+            Remove previously stored query with provided name.
+            This is terminating option - all other options are ignored.
         """,
     )(func)
