@@ -47,6 +47,7 @@ from validators.command_option_validators import assert_correct_table_library
 @show_stored_queries_option
 @remove_stored_query
 # pylint: disable = too-many-arguments
+# pylint: disable = too-many-locals
 def git_hot(
     file_paths: Tuple[str],
     columns: Optional[str],

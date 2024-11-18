@@ -4,7 +4,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import List, Dict, cast, Tuple
+from typing import List, Dict, Tuple
 import re
 
 
@@ -60,7 +60,9 @@ def get_stored_queries_from_file() -> Dict[str, str]:
     """Get all stored queries"""
     file_path = get_stored_queries_file_path()
     try:
-        with open(os.path.join(file_path[0], file_path[1]), "r") as file:
+        with open(
+            os.path.join(file_path[0], file_path[1]), "r", encoding="utf-8"
+        ) as file:
             return json.load(file)
     except FileNotFoundError:
         return {}
@@ -70,6 +72,6 @@ def save_queries_to_file(queries: Dict[str, str]) -> None:
     """Saves queries to file"""
     file_path = get_stored_queries_file_path()
     Path.mkdir(Path(file_path[0]), exist_ok=True, parents=True)
-    with open(os.path.join(file_path[0], file_path[1]), "w") as file:
+    with open(os.path.join(file_path[0], file_path[1]), "w", encoding="utf-8") as file:
         # noinspection PyTypeChecker
         json.dump(queries, file)
