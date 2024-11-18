@@ -1,7 +1,5 @@
 """Command options decorators"""
 
-from email.policy import default
-
 from click import option, Command
 
 from command_interface.help_text import (
@@ -130,7 +128,7 @@ def save_query_option(func) -> Command:
         "--save-query",
         "--sq",
         default=None,
-        help=f"""
+        help="""
             Save currently executing query with provided name
         """,
     )(func)
@@ -142,7 +140,7 @@ def execute_stored_query_option(func) -> Command:
         "--execute-query",
         "--eq",
         default=None,
-        help=f"""
+        help="""
             Execute previously stored query with provided name.
             This is terminating option - all other options are ignored.
         """,
@@ -156,7 +154,7 @@ def show_stored_queries_option(func) -> Command:
         "--lq",
         is_flag=True,
         default=False,
-        help=f"""
+        help="""
             List all stored queries.
             This is terminating option - all other options are ignored.
         """,
@@ -169,7 +167,7 @@ def remove_stored_query(func) -> Command:
         "--remove-query",
         "--rq",
         default=None,
-        help=f"""
+        help="""
             Remove previously stored query with provided name.
             This is terminating option - all other options are ignored.
         """,
