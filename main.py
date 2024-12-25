@@ -5,12 +5,10 @@ import click
 
 from app_types.dataclasses import SeparateOptionsAsQuery
 from command_interface.option_processors import (
-    process_list_stored_queries,
-    process_remove_stored_query,
-    process_terminating_options,
     process_execute_stored_query,
     process_query,
     process_save_query,
+    process_terminating_options,
 )
 from command_interface.options import (
     columns_option,
@@ -66,13 +64,12 @@ def git_hot(
     """Command entry point"""
     file_path: str = file_paths[0] if len(file_paths) > 0 else "./"
 
-    if process_list_stored_queries(list_queries):
-        return
-
-    if process_remove_stored_query(remove_query):
-        return
-
-    if process_terminating_options(file_path, nontext):
+    if process_terminating_options(
+        file_path,
+        list_queries=list_queries,
+        remove_queries=remove_query,
+        list_non_text=nontext,
+    ):
         return
 
     engine = create_db_engine()

@@ -19,7 +19,10 @@ from utils.git_utils import (
     get_all_files_stats,
     get_non_text_files,
 )
-from validators.command_option_validators import assert_query_exists_for_execution
+from validators.command_option_validators import (
+    assert_query_exists_for_execution,
+    assert_only_single_terminating_option_provided,
+)
 from validators.repo_validators import assert_repo_result_is_valid
 from validators.root_node_validators import assert_root_node_result_is_valid
 
@@ -80,7 +83,7 @@ def process_query(
     return root_node.show_node.column_names, rows
 
 
-def process_terminating_options(repo_path: str | None, non_text: bool) -> bool:
+def process_list_non_text_option(repo_path: str | None, non_text: bool) -> bool:
     """Process options, after which all other options are ignored"""
     if non_text:
         non_text_files = get_non_text_files(Git(repo_path))
@@ -151,6 +154,24 @@ def process_remove_stored_query(query_name: Optional[str]) -> bool:
                 f"Cannot delete query. There is no stored query with name: {query_name}"
             )
 
+        return True
+
+    return False
+
+
+def process_terminating_options(
+    file_path: str,
+    **kwargs,
+) -> bool:
+    """Process terminating options"""
+    assert_only_single_terminating_option_provided(**kwargs)
+    if process_list_stored_queries(kwargs.get("list_queries", None)):
+        return True
+
+    if process_remove_stored_query(kwargs.get("remove_query", None)):
+        return True
+
+    if process_list_non_text_option(file_path, kwargs.get("list_non_text", False)):
         return True
 
     return False
