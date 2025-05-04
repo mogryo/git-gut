@@ -22,11 +22,9 @@ class ColumnDataBuilder:
         self,
         files_stats: Dict[str, List[FileCommitStats]],
         flat_file_tree: List[str],
-        repo_instance: Repo,
         **kwargs: Unpack[ColumnBuilderKwargs],
     ):
         self._files_stats = files_stats
-        self.repo_instance = repo_instance
         self.flat_file_tree = flat_file_tree
         self.pathname_length = kwargs.get("pathname_length", 2)
         self._columns: OrderedDict[str, List[str]] = OrderedDict()
