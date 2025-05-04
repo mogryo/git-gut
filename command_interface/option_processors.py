@@ -67,7 +67,6 @@ def process_query(
         ColumnDataBuilder(
             all_files_stats,
             flat_file_tree,
-            repo,
             pathname_length=2,
         )
     )
