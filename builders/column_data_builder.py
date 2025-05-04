@@ -2,7 +2,6 @@
 
 from typing import Unpack, List, Self, Callable, Dict
 from collections import OrderedDict
-from git import Repo
 from app_types.dataclasses import FileCommitStats
 from app_types.utils import ColumnBuilderKwargs
 from decorators.column_building_method import column_building_method
