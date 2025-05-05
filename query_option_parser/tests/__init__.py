@@ -1,1 +1,0 @@
-"""Query option parser tests"""

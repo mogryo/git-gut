@@ -26,7 +26,7 @@ async def _file_name_producer(queue: asyncio.Queue, file_names: List[str]) -> No
     """
     Producer for collecting files git stats
     This function should not be called directly
-    :param queue: asyncion.Queue
+    :param queue: asyncio.Queue
     :param file_names: List of all file names
     :return: Explicitly return None
     """
@@ -77,7 +77,7 @@ async def _collect_stats_all_files(
     Collect git stats for each file
     This function should not be called directly
     :param git_instance: Instance of Git
-    :oaram file_names: List of all file names
+    :param file_names: List of all file names
     """
     queue = asyncio.Queue(maxsize=32)
     task_result = await asyncio.gather(
@@ -103,8 +103,9 @@ def get_all_files_stats(
 ) -> Dict[str, List[FileCommitStats]]:
     """
     Return git stats for all specified files
-    :param repo_path: Path to git repo
     :param file_names: All specified file names for which we need to collect stats
+    :param git: Git instance
+    :param log_options: Git log options
     :return: List of git stats for each file
     """
     return asyncio.run(_collect_stats_all_files(git, file_names, log_options))
@@ -114,7 +115,7 @@ def get_flat_file_tree(tree: Tree, specific_path: Optional[str] = None) -> List[
     """
     Iterate through the whole git file tree.
     :param tree: Instance of git.Tree
-    :specific_path: Optional parameter to specify sub directory, specific file, omit if whole repo
+    :param specific_path: Optional parameter to specify directory, specific file, omit if whole repo
     :return: Flat representation of file tree.
     """
     if specific_path is not None and os.path.isdir(specific_path):
@@ -130,7 +131,7 @@ def get_specific_file_as_list(tree: Tree, specific_path: str) -> List[str]:
     """
     Make sure specified file path exists in git tree and return in a list
     :param tree: Instance of git.Tree
-    :specific_path: File path
+    :param specific_path: File path
     :return: Single file name inside of list
     """
     generated_list: List[str] = []
@@ -149,10 +150,10 @@ def get_specific_file_as_list(tree: Tree, specific_path: str) -> List[str]:
 
 def get_sub_directory_file_list(tree: Tree, specific_path: str) -> List[str]:
     """
-    Return sub directory of repo as flat structure
+    Return subdirectory of repo as flat structure
     :param tree: Instance of git.Tree
-    :specific_path: Sub directory to return as flat file tree
-    :return: Flat representation of file tree of sub directory in repo
+    :param specific_path: Sub directory to return as flat file tree
+    :return: Flat representation of file tree of subdirectory in repo
     """
     generated_list: List[str] = []
     abs_specific_path = os.path.abspath(specific_path)
@@ -201,7 +202,8 @@ def get_file_stats(
     """
     Collect number stats about single file from git.
     :param git_instance: Instance of git.Git
-    :param filepath: File path.
+    :param filepath: Path to the file
+    :param log_options: Git log options
     :return: Return list of stats.
     """
     options = []
@@ -232,34 +234,29 @@ def get_file_stats(
     return result
 
 
-def get_most_frequent_author(
-    file_name: str, files_stats: Dict[str, List[FileCommitStats]]
-) -> str:
+def get_most_frequent_author(file_stats: List[FileCommitStats]) -> str:
     """
     Calculate the author of the most code in file
-    :param git_instance: Instance of git.Git
-    :param file_name: Name of file
+    :param file_stats: Git stats of a file
     :return: Author name
     """
-    authors = [info.author for info in files_stats.get(file_name, [])]
+    authors = [info.author for info in file_stats]
     return trim_side_quotes(mode(authors)) if len(authors) > 0 else "-"
 
 
 def get_top_author_by_stat(
-    file_name: str,
-    files_stats: Dict[str, List[FileCommitStats]],
+    file_stats: List[FileCommitStats],
     func: Callable[[FileCommitStats], int],
 ) -> str:
     """
     Functions calculates top author,
     by summing up specific stat which is returned by provided function
-    :param git_instance: Instance of git.Git
-    :param file_name: Name of file
+    :param file_stats: Git stats of a file
     :param func: Function to be applied on file commit stats to extract specific property
     :return: Top author and summed up stat
     """
     authors_data = {}
-    for stat in files_stats.get(file_name, []):
+    for stat in file_stats:
         authors_data[stat.author] = authors_data.get(stat.author, 0) + func(stat)
 
     top_author = max(authors_data, key=authors_data.get)
@@ -272,7 +269,6 @@ def get_non_text_files(git_instance: Git) -> List[str]:
     """
     Get GIT tracked files which are non text (binary).
     :param git_instance: Instance of git.Git
-    :param filepath: File path.
     :return: List of file names.
     """
     existing_files: List[str] = git_instance.ls_files().split()
