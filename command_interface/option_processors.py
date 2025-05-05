@@ -7,8 +7,6 @@ from git import Repo, Git
 
 from app_types.result import ResultUnion
 from app_types.dataclasses import FileCommitStats, GitLogOptions
-from builders.column_data_builder import ColumnDataBuilder
-from builders.table_data_builder import TableDataBuilder
 from enums.table import CliTableColumn
 from repositories.git_stat_repo import prepare_query_statement, prepare_all_rows
 from utils.command_option_parser import parse_option_query
@@ -19,6 +17,7 @@ from utils.git_utils import (
     get_all_files_stats,
     get_non_text_files,
 )
+from utils.table_data_calculator import TableDataCalculator
 from validators.command_option_validators import (
     assert_query_exists_for_execution,
     assert_only_single_terminating_option_provided,
@@ -63,15 +62,13 @@ def process_query(
         ),
     )
 
-    table_data_builder = TableDataBuilder(
-        ColumnDataBuilder(
-            all_files_stats,
-            flat_file_tree,
-            pathname_length=2,
-        )
+    table_data_builder = TableDataCalculator(
+        flat_file_tree,
+        all_files_stats,
+        pathname_length=2,
     )
     select = prepare_query_statement(root_node)
-    data_rows = table_data_builder.build_data(root_node.show_node.column_names).rows
+    data_rows = table_data_builder.calculate_data(root_node.show_node.column_names)
 
     with Session(engine) as session:
         git_stat_list = prepare_all_rows(root_node.show_node.column_names, data_rows)
