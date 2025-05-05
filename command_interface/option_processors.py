@@ -4,6 +4,7 @@ from typing import Optional, Tuple, List, Dict
 from sqlalchemy.orm import Session
 from sqlalchemy import Engine
 from git import Repo, Git
+from halo import Halo
 
 from app_types.result import ResultUnion
 from app_types.dataclasses import FileCommitStats, GitLogOptions
@@ -29,8 +30,10 @@ from validators.root_node_validators import assert_root_node_result_is_valid
 def process_query(
     query: Optional[str],
     engine: Engine,
+    spinner: Halo,
 ) -> Tuple[List[CliTableColumn], List[List[str | float | int]]]:
     """Process query option provided"""
+    spinner.start("Gathering Git information")
     all_files_stats: Dict[str, List[FileCommitStats]]
     root_node_result = parse_option_query(query)
 
@@ -61,7 +64,9 @@ def process_query(
             ),
         ),
     )
+    spinner.succeed("Git information gathered")
 
+    spinner.start("Calculating data")
     table_data_builder = TableDataCalculator(
         flat_file_tree,
         all_files_stats,
@@ -69,12 +74,15 @@ def process_query(
     )
     select = prepare_query_statement(root_node)
     data_rows = table_data_builder.calculate_data(root_node.show_node.column_names)
+    spinner.succeed("Data calculated")
 
+    spinner.start("Processing sorting/filtering of data")
     with Session(engine) as session:
         git_stat_list = prepare_all_rows(root_node.show_node.column_names, data_rows)
         session.add_all(git_stat_list)
         session.commit()
         rows = [[*row] for row in session.execute(select)]
+    spinner.succeed("Data sorted and filtered")
 
     return root_node.show_node.column_names, rows
 
