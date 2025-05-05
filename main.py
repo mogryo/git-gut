@@ -2,6 +2,7 @@
 
 from typing import Optional, Tuple
 import click
+from halo import Halo
 
 from app_types.dataclasses import SeparateOptionsAsQuery
 from command_interface.option_processors import (
@@ -73,6 +74,8 @@ def git_hot(
     ):
         return
 
+    spinner = Halo(text="Initializing environment", spinner="dots")
+    spinner.start()
     engine = create_db_engine()
     create_tables(engine)
 
@@ -85,8 +88,9 @@ def git_hot(
         input_query = parse_separate_options_into_query(
             SeparateOptionsAsQuery(columns, file_path, sort, filters, since, until)
         )
+    spinner.succeed("Environment initialized")
 
-    column_names, result_rows = process_query(input_query, engine)
+    column_names, result_rows = process_query(input_query, engine, spinner)
 
     table_lib_result = create_table_instance(table)
     assert_correct_table_library(table_lib_result)

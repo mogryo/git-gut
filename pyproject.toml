@@ -21,6 +21,7 @@ SQLAlchemy = "^2.0.40"
 typing-extensions = "^4.12.1"
 pydash = "^8.0.3"
 rich = "^13.9.3"
+halo = "^0.0.31"
 
 
 [tool.poetry.group.dev.dependencies]
